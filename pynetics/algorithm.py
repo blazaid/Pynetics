@@ -31,6 +31,7 @@ import inspect
 import math
 import random
 from collections import Sequence
+from typing import Tuple
 
 from . import api, callback
 from .exception import NotInitialized
@@ -57,9 +58,9 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             stop_condition: api.StopCondition,
             fitness: api.Fitness,
             selection: api.Selection,
-            recombination: [api.Recombination, float],
-            mutation: [api.Mutation, float],
-            replacement: [api.Replacement, float],
+            recombination: Tuple[api.Recombination, float],
+            mutation: Tuple[api.Mutation, float],
+            replacement: Tuple[api.Replacement, float],
             callbacks: Sequence[callback.Callback] = None,
     ):
         """Initializes this object

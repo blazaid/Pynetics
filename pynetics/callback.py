@@ -26,7 +26,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Dict, Optional
+from typing import Dict
 
 from . import api
 
@@ -95,7 +95,7 @@ class History(Callback):
     def __init__(self):
         """Initializes this object."""
         self.generation: int = 0
-        self.data: Optional[Dict] = {}
+        self.data: Dict = {}
 
     def on_algorithm_begin(self, ga: api.EvolutiveAlgorithm):
         """When the algorithm starts, the parameters are reset.

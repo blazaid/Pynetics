@@ -43,9 +43,6 @@ class StopConditionTests(metaclass=abc.ABCMeta):
         :return: An stop condition instance.
         """
 
-    def test_genetic_algorithm_cannot_be_none(self):
-        stop_condition = self.get_stop_condition()
-
 
 # ~~~~~~~~~~~~~~
 # Specific tests

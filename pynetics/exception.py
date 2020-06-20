@@ -55,11 +55,7 @@ class NotInitialized(GeneticAlgorithmError):
     """The algorithm hasn't been initialized before start."""
 
     def __init__(self):
-        super().__init__(
-            "The algorithm has not been initialized. "
-            "Check if the initialize method has been "
-            "overridden without calling to the "
-            "superclass (i.e. super().initialize().")
+        super().__init__('The algorithm has not been initialized')
 
 
 class PopulationError(PyneticsError):

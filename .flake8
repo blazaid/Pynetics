@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist,
+    examples/*
+max-line-length = 79
+max-doc-length = 72

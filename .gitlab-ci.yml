@@ -1,0 +1,33 @@
+image: python:3.7-alpine
+
+before_script:
+  - apk add --no-cache git build-base openssl-dev libffi-dev python3-dev
+  - pip install pipenv
+  - pipenv install --dev
+
+stages:
+  - Static analysis
+  - Test
+  - Deploy
+
+flake8:
+  stage: Static analysis
+  script:
+    - pipenv run pre-commit run flake8
+
+pytest:
+  stage: Test
+  script:
+    - pipenv run coverage run --source pynetics -m pytest tests
+    - pipenv run coverage xml -o coverage.xml
+    - pipenv run coverage report -m
+
+pypi:
+  stage: Deploy
+  variables:
+    $TWINE_USERNAME: $TWINE_USERNAME
+    $TWINE_PASSWORD: $TWINE_PASSWORD
+  script:
+    - pipenv run twine upload dist/*
+  only:
+    - tags

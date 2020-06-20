@@ -30,7 +30,7 @@ import pytest
 
 from pynetics.api import Population
 from pynetics.callback import Callback
-from pynetics.exception import FullPopulationError
+from pynetics.exception import FullPopulationError, NotInitialized
 from pynetics.stop import NumSteps
 from tests.util import build_population
 
@@ -139,8 +139,16 @@ class GenotypeTests(GenericTest, metaclass=abc.ABCMeta):
     def test_no_fitness_function_after_creation(self):
         """Base creation implies a genotype without fitness function."""
         genotype = self.get_instance()
-        with pytest.raises(TypeError):
+        with pytest.raises(NotInitialized):
             genotype.fitness()
+
+    def test_fitness_function_called_if_initialized(self):
+        """Base creation implies a genotype without fitness function."""
+        genotype = self.get_instance()
+        genotype.fitness_function = Mock(side_effect=lambda g: 42)
+        genotype.fitness()
+
+        genotype.fitness_function.assert_called_once()
 
     @abc.abstractmethod
     def test_check_equality_between_two_genotypes(self):

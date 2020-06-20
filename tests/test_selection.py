@@ -271,7 +271,6 @@ class TestExponentialRank(WeightBasedSchemaTests):
     def get_selection_schema(self, replacement=False):
         return ExponentialRank(alpha=4, replacement=replacement)
 
-
     def test_correct_weights_for_selection(self):
         self.weights_testing(
             populations=[build_population(size) for size in (2, 4, 8)],
@@ -306,7 +305,6 @@ class TestLinearRank(WeightBasedSchemaTests):
 
     def get_selection_schema(self, replacement=False):
         return LinearRank(alpha=2, replacement=replacement)
-
 
     def test_correct_weights_for_selection(self):
         self.weights_testing(

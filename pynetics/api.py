@@ -31,10 +31,20 @@ from __future__ import annotations
 import abc
 import enum
 import itertools
-from typing import Optional, Sequence, Callable, List, Iterable, Tuple, Any
+from typing import (
+    Optional,
+    Sequence,
+    Callable,
+    List,
+    Iterable,
+    Tuple,
+    Any,
+    Union,
+    MutableSequence,
+)
 
 from . import callback
-from .exception import FullPopulationError
+from .exception import FullPopulationError, NotInitialized
 
 
 # ~~~~~~~~~~~~
@@ -189,10 +199,13 @@ class Genotype(metaclass=abc.ABCMeta):
 
         :return: The fitness of this particular genotype
         """
-        return self.fitness_function(self)
+        if self.fitness_function is not None:
+            return self.fitness_function(self)
+        else:
+            raise NotInitialized()
 
     @abc.abstractmethod
-    def __eq__(self, other: Genotype) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Equality operator between two genotypes.
 
         Overriding is force to ensure the method differs from that
@@ -202,7 +215,7 @@ class Genotype(metaclass=abc.ABCMeta):
         :return: True if the two genotypes differ or false otherwise.
         """
 
-    def __ne__(self, other: Genotype) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Inequality operator (as the negation of the equality one).
 
         :param other: The other genotype to compare with.
@@ -246,13 +259,13 @@ class Initializer(metaclass=abc.ABCMeta):
         return population
 
 
-class Population(List[Genotype]):
+class Population(MutableSequence[Genotype]):
     """Manages the pool of genotypes that are solutions of a G.A.
 
     It's a subclass of list, but with some additions.
     """
 
-    def __init__(self, size: int, fitness: Fitness, *args, **kwargs):
+    def __init__(self, size: int, fitness: Fitness):
         """Initializes a new instance of this object.
 
         :param size: The maximum size of genotypes this population
@@ -260,25 +273,11 @@ class Population(List[Genotype]):
         :param fitness: The fitness functor to assign to the genotypes
             added to this population.
         """
-        super().__init__(*args, **kwargs)
+        self.genotypes: List[Genotype] = []
         self.fitness = fitness
         self.max_size = size
 
         self.is_sorted = True
-
-    def full(self) -> bool:
-        """Points out if the population is full or not.
-
-        :return: True if the population is complete or false otherwise.
-        """
-        return len(self) >= self.max_size
-
-    def empty(self) -> bool:
-        """Points out if the population is empty or not.
-
-        :return: True if the population is empty or false otherwise.
-        """
-        return len(self) == 0
 
     def __add__(self, other: Population) -> Population:
         """Creates a new population adding the two specified.
@@ -295,12 +294,19 @@ class Population(List[Genotype]):
             fitness=self.fitness
         )
 
-        for genotype in itertools.chain(self, other):
+        for genotype in itertools.chain(self.genotypes, other.genotypes):
             new_population.append(genotype)
 
         return new_population
 
-    def __setitem__(self, key: int, genotype: Genotype):
+    def __getitem__(self, item: Union[int, slice]) -> Any:
+        """To recover any item via bracket notation.
+
+        :param item: The item to recover.
+        """
+        return self.genotypes.__getitem__(item)
+
+    def __setitem__(self, key: int, genotype: Genotype) -> None:
         """Called to implement the assignment of self[key].
 
         The implementation is delegated to the super class (list) but
@@ -317,9 +323,38 @@ class Population(List[Genotype]):
             indexes for the sequence (after any special interpretation
             of negative values).
         """
-        super().__setitem__(key, genotype)
+        self.genotypes.__setitem__(key, genotype)
         genotype.fitness_function = self.fitness
         self.is_sorted = False
+
+    def __delitem__(self, i: Union[int, slice]) -> None:
+        """Removes the elements located in the position or slice i.
+
+        :param i: The index to the elements to be deleted.
+        """
+        self.genotypes.__delitem__(i)
+
+    def __len__(self) -> int:
+        """Returns the number of genotypes contained in this population.
+
+        :return: The number of genotypes. It could be less than the
+            Population's max size, but never greater.
+        """
+        return len(self.genotypes)
+
+    def full(self) -> bool:
+        """Points out if the population is full or not.
+
+        :return: True if the population is complete or false otherwise.
+        """
+        return len(self) >= self.max_size
+
+    def empty(self) -> bool:
+        """Points out if the population is empty or not.
+
+        :return: True if the population is empty or false otherwise.
+        """
+        return len(self) == 0
 
     def append(self, genotype: Genotype) -> None:
         """Add a new genotype to this population.
@@ -340,7 +375,7 @@ class Population(List[Genotype]):
         if self.full():
             raise FullPopulationError(self.max_size)
         else:
-            super().append(genotype)
+            self.genotypes.append(genotype)
             genotype.fitness_function = self.fitness
             self.is_sorted = False
 
@@ -363,7 +398,6 @@ class Population(List[Genotype]):
         for genotype in genotypes:
             genotype.fitness_function = self.fitness
             self.append(genotype)
-        self.is_sorted = False
 
     def insert(self, index: int, genotype: Genotype) -> None:
         """Add a new genotype to this population.
@@ -385,9 +419,16 @@ class Population(List[Genotype]):
         if self.full():
             raise FullPopulationError(self.max_size)
         else:
-            super().insert(index, genotype)
+            self.genotypes.insert(index, genotype)
             genotype.fitness_function = self.fitness
             self.is_sorted = False
+
+    def pop(self, i: int = 0) -> Genotype:
+        """Extracts the object in the specified position.
+
+        :param i: The position. If not specified, it will be position 0.
+        """
+        return self.genotypes.pop(i)
 
     def reverse(self) -> None:
         """Reverse the elements of the list in place.
@@ -395,7 +436,7 @@ class Population(List[Genotype]):
         The implementation is delegated to the super class (list) but
         the population is marked as not sorted.
         """
-        super().reverse()
+        self.genotypes.reverse()
         self.is_sorted = False
 
     def sort(self, **kwargs) -> None:
@@ -405,8 +446,13 @@ class Population(List[Genotype]):
         in ascending order, i.e. from lower to higher fitness.
         """
         if not self.is_sorted:
-            super().sort(key=lambda genotype: genotype.fitness())
+            self.genotypes.sort(key=lambda genotype: genotype.fitness())
             self.is_sorted = True
+
+    def clear(self):
+        """Removes all the population genotypes."""
+        self.genotypes.clear()
+        self.is_sorted = True
 
 
 # Definitions for typing purposes

@@ -26,9 +26,10 @@
 import abc
 import math
 import random
-from typing import Tuple, Iterable
+from typing import Tuple, Iterable, List
 
 from . import api
+from .api import Genotype
 from .exception import (
     EmptyPopulation,
     CannotSelectThatMany,
@@ -134,7 +135,7 @@ class WeightedSelectionSchema(SelectionSchema, metaclass=abc.ABCMeta):
         """
         available_genotypes = population[:]
         weights = None
-        selected_genotypes = []
+        selected_genotypes: List[Genotype] = []
         while len(selected_genotypes) < n:
             # Recalculate the weights in case no replacement is allowed
             # (because the available genotypes list has changed)
@@ -355,7 +356,7 @@ class Tournament(SelectionSchema):
         :return: A sequence of genotypes.
         """
         available_genotypes = population[:]
-        selected_genotypes = []
+        selected_genotypes: List[Genotype] = []
         while len(selected_genotypes) < n:
             # Extract a random sample of genotypes
             sample = random.choices(available_genotypes, k=self.m)
