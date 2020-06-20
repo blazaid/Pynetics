@@ -38,4 +38,4 @@ directly:
 
 TODO Organize in a way that this actually happens
 """
-__version__ = '0.6.0'
+__version__ = '0.6.1'

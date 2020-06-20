@@ -5,6 +5,9 @@ This document holds all the changes in the project.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning]
 
+## 0.6.1 - 2020-06-20
+- Fixed CI/CD configuration for deployment on PyPi.
+
 ## 0.6.0 - 2020-06-18
 
 - Recovered all the old API and rewritten part of the code to provide a
