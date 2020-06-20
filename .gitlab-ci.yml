@@ -28,6 +28,7 @@ pypi:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
+    - pipenv run python setup.py sdist
     - pipenv run twine upload dist/*
   only:
     - tags
