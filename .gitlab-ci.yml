@@ -28,7 +28,8 @@ pypi:
     TWINE_USERNAME: $PYPI_USERNAME
     TWINE_PASSWORD: $PYPI_PASSWORD
   script:
-    - pipenv run python setup.py sdist
-    - pipenv run twine upload dist/*
+    - pipenv run python setup.py sdist bdist_wheel
+    - pipenv run twine check dist/*
+    - pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
   only:
     - tags
