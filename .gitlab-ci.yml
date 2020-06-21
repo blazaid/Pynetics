@@ -1,7 +1,7 @@
 image: python:3.7-buster
 
 before_script:
-  - apt install git build-base openssl-dev libffi-dev libpython3-dev
+  - apt install git build-essential libssl-dev libffi-dev python3-dev
   - pip install pipenv
   - pipenv install --dev
 
