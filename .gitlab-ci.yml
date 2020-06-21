@@ -13,7 +13,7 @@ stages:
 flake8:
   stage: Static analysis
   script:
-    - pipenv run pre-commit run flake8
+    - pipenv run flake8
 
 pytest:
   stage: Test
