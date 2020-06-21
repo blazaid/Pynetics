@@ -6,21 +6,21 @@ before_script:
   - pipenv install --dev
 
 stages:
-#  - Static analysis
-#  - Test
+  - Static analysis
+  - Test
   - Deploy
 
-#flake8:
-#  stage: Static analysis
-#  script:
-#    - pipenv run flake8
+flake8:
+  stage: Static analysis
+  script:
+    - pipenv run flake8
 
-#pytest:
-#  stage: Test
-#  script:
-#    - pipenv run coverage run --source pynetics -m pytest tests
-#    - pipenv run coverage xml -o coverage.xml
-#    - pipenv run coverage report -m
+pytest:
+  stage: Test
+  script:
+    - pipenv run coverage run --source pynetics -m pytest tests
+    - pipenv run coverage xml -o coverage.xml
+    - pipenv run coverage report -m
 
 pypi:
   stage: Deploy
@@ -31,5 +31,5 @@ pypi:
     - pipenv run python setup.py sdist bdist_wheel
     - pipenv run twine check dist/*
     - pipenv run twine upload dist/*
-#  only:
-#    - tags
+  only:
+    - tags

@@ -11,6 +11,7 @@ flake8 = "*"
 pre-commit = "*"
 coverage = "*"
 mypy = "*"
+pylint = "*"
 
 [packages]
 
