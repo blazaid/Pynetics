@@ -1,7 +1,7 @@
 image: python:3.7-alpine
 
 before_script:
-  - apk add --no-cache git build-base openssl-dev libffi-dev python3-dev
+  - apk add git build-base openssl-dev libffi-dev python3-dev
   - pip install pipenv
   - pipenv install --dev
 
@@ -25,11 +25,12 @@ pytest:
 pypi:
   stage: Deploy
   variables:
-    TWINE_USERNAME: $PYPI_USERNAME
-    TWINE_PASSWORD: $PYPI_PASSWORD
+    TWINE_USERNAME: $TWINE_USERNAME
+    TWINE_PASSWORD: $TWINE_PASSWORD
   script:
     - pipenv run python setup.py sdist bdist_wheel
     - pipenv run twine check dist/*
-    - pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+    - echo $TWINE_USERNAME
+    - pipenv run twine upload dist/*
   only:
     - tags
