@@ -22,7 +22,6 @@
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
 """Tests for all the stop criteria."""
-import abc
 from unittest.mock import Mock
 
 import pytest
@@ -30,26 +29,7 @@ import pytest
 from pynetics.stop import FitnessBound, NumSteps
 
 
-# ~~~~~~~~~~~~~
-# Generic tests
-# ~~~~~~~~~~~~~
-class StopConditionTests(metaclass=abc.ABCMeta):
-    """Generic behavior for the implemented stop conditions."""
-
-    @abc.abstractmethod
-    def get_stop_condition(self):
-        """Returns a valid stop condition for this particular test.
-
-        :return: An stop condition instance.
-        """
-
-
-# ~~~~~~~~~~~~~~
-# Specific tests
-# ~~~~~~~~~~~~~~
-class TestFitnessBound(StopConditionTests):
-    def get_stop_condition(self):
-        return FitnessBound(bound=1.0)
+class TestFitnessBound:
 
     def test_correct_construction(self):
         for bound in range(0, 10):
@@ -76,9 +56,7 @@ class TestFitnessBound(StopConditionTests):
             assert stop_condition(genetic_algorithm)
 
 
-class TestNumSteps(StopConditionTests):
-    def get_stop_condition(self):
-        return NumSteps(steps=90)
+class TestNumSteps:
 
     @pytest.mark.parametrize('steps', [10, 20, 30])
     @pytest.mark.parametrize('generation', [1, 2, 4, 8])

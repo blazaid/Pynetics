@@ -53,23 +53,20 @@ CITIES = [tuple(random.uniform(-100, 100) for d in range(D)) for _ in range(N)]
 #
 # We are going to write a helper method in order to represent the
 # individual
-#
-# TODO Move phenotype function to a method of genotype
 
-
-def phenotype(genotype):
+def route_and_distance(phenotype):
     # Extract the values of the cards on each deck
     def dist(x, y):
         return sum([math.pow(a - b, 2) for a, b in zip(x, y)])
 
     total_distance = 0
-    for i in range(len(genotype) - 1):
+    for i in range(len(phenotype) - 1):
         total_distance += dist(
-            CITIES[genotype[i]],
-            CITIES[genotype[i + 1]]
+            CITIES[phenotype[i]],
+            CITIES[phenotype[i + 1]]
         )
 
-    return '->'.join(str(g) for g in genotype), total_distance
+    return '->'.join(str(g) for g in phenotype), total_distance
 
 
 # 2. Fitness
@@ -77,13 +74,13 @@ def phenotype(genotype):
 # Now that we have a encoding, lets compute the fitness. The idea is to
 # cover the minimum possible euclidean distance so the higher the
 # distance, the lower the individual's fitness.
-def fitness(genotype):
+def fitness(phenotype):
     """Computes the fitness given a genotype.
 
     Computes the distance and returns a fitness inversely proportional
     to that distance. We use the squared euclidean as is less expensive.
     """
-    _, total_distance = phenotype(genotype)
+    _, total_distance = route_and_distance(phenotype)
 
     # Compute the fitness according to that error
     return 1 / (1 + total_distance)
@@ -93,7 +90,7 @@ class MyCallback(Callback):
     def on_step_ends(self, g):
         best = g.best()
 
-        path, total_distance = phenotype(best)
+        path, total_distance = route_and_distance(best.phenotype())
 
         if g.generation % 10 == 0:
             print(f'{g.generation}\tfitness: {best.fitness():.9f}'
@@ -106,7 +103,7 @@ if __name__ == '__main__':
     ga = GeneticAlgorithm(
         population_size=10,
         initializer=PermutationInitializer(size=N, alphabet=alphabet),
-        stop_condition=NumSteps(1000),
+        stop_condition=NumSteps(100),
         fitness=fitness,
         selection=Tournament(2),
         recombination=(pmx, 1.0),
@@ -116,4 +113,3 @@ if __name__ == '__main__':
     )
 
     history = ga.run()
-    print(history)

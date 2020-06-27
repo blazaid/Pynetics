@@ -39,12 +39,12 @@ from pynetics.stop import FitnessBound
 GENOTYPE_LEN = 50
 
 
-def fitness(genotype):
+def fitness(phenotype):
     """Calculated as the sum of the 1's by the length of the chromosome.
 
-    :return: The fitness of the genotype's phenotype.
+    :return: The fitness of the individual.
     """
-    return sum(genotype.genes) / len(genotype)
+    return sum(phenotype) / len(phenotype)
 
 
 if __name__ == '__main__':

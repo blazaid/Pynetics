@@ -129,6 +129,20 @@ class TestListGenotype(GenotypeTests):
 
         assert len(genotype) == expected_size
 
+    @pytest.mark.parametrize('genes', [
+        [],
+        [0],
+        [0, 1],
+        [0, 1, 2],
+        [0, 1, 2, 3],
+        ['I', 'ken', 'lee', 'tolibu', 'dibu', 'douchoo']
+    ])
+    def test_phenotype(self, genes):
+        genotype = self.get_instance(genes=genes)
+
+        assert genotype.phenotype() == genes
+        assert genotype is not genes
+
     @pytest.mark.parametrize('genes, expected_string', [
         (ListGenotype(genes=[]), ''),
         (ListGenotype(genes=[0]), '0'),

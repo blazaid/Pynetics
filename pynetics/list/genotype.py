@@ -26,7 +26,7 @@
 from __future__ import annotations
 
 import collections
-from typing import Any, Iterable
+from typing import Any, Iterable, List
 
 from .. import api
 
@@ -53,6 +53,14 @@ class ListGenotype(
         """
         super().__init__()
         self.genes = list(genes) if genes is not None else []
+
+    def phenotype(self) -> List[Any]:
+        """Returns the list of genes conforming this genotype.
+
+        :return: An ordered list with the elements conforming this
+            genotype.
+        """
+        return self.genes[:]
 
     def __eq__(self, other: ListGenotype) -> bool:
         """The equality between two list genotypes is True if they:

@@ -18,7 +18,7 @@ of letters, numbers, punctuation marks and spaces, and we want to build an
 algorithm that finds that sentence.
 
 We just need to program a new fitness function and provide a genotype
-initializer with our alphabet.
+initializer with our alphabet. But the
 
 Fitness
 -------
@@ -34,16 +34,16 @@ An implementation for this fitness could be as follows:
 
 .. code-block:: python
 
-   def fitness(genotype):
-    """The fitness will be based on the hamming distance error."""
-    # Derive the phenotype from the genotype
-    phenotype = ''.join(str(x) for x in genotype)
-    # Compute the error of this solution
-    error = len([i for i in filter(
-        lambda x: x[0] != x[1], zip(phenotype, TARGET)
-    )])
-    # Return the fitness according to that error
-    return 1 / (1 + error)
+    def fitness(phenotype):
+        """The fitness will be based on the hamming distance error."""
+        # Derive the phenotype from the genotype
+        sentence = ''.join(str(x) for x in phenotype)
+        # Compute the error of this solution
+        error = len([i for i in filter(
+        lambda x: x[0] != x[1], zip(sentence, TARGET)
+        )])
+        # Return the fitness according to that error
+        return 1 / (1 + error)
 
 This is not the only implementation, but it is simple enough to see what's
 happening. We are assuming that our genotypes are composed of genes belonging

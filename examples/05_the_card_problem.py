@@ -58,24 +58,24 @@ TARGET_2 = 360  # Product target
 # individual
 #
 # TODO Move phenotype function to a method of genotype
-def phenotype(genotype):
+def extract_decks(phenotype):
     """The phenotype will be a tuple of two decks containing a list of
     the cards included on that decks."""
     # Those positions marked as 0 will belong to the deck 1 (sum)
-    deck1 = [i for (i, g) in enumerate(genotype, start=1) if g == 0]
+    deck1 = [i for (i, g) in enumerate(phenotype, start=1) if g == 0]
     # Those positions marked as 1 will belong to the deck 2 (productS)
-    deck2 = [i for (i, g) in enumerate(genotype, start=1) if g == 1]
+    deck2 = [i for (i, g) in enumerate(phenotype, start=1) if g == 1]
 
     return deck1, deck2
 
 
-def fitness(genotype):
+def fitness(phenotype):
     """Fitness will be based on the distance error to the target values.
 
     The error will be the sum of both errors, which will be computed as
     RMSE to the targets.
     """
-    deck1, deck2 = phenotype(genotype)
+    deck1, deck2 = extract_decks(phenotype)
 
     error1 = abs((sum(deck1) - TARGET_1) / TARGET_1)
     error2 = abs((reduce(operator.mul, deck2, 1) - TARGET_2) / TARGET_2)
@@ -91,7 +91,7 @@ class MyCallback(Callback):
         print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
             g.generation,
             g.best().fitness(),
-            phenotype(g.best()),
+            extract_decks(g.best().route_and_distance()),
         ))
 
 

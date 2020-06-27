@@ -38,12 +38,12 @@ from pynetics.stop import FitnessBound
 TARGET_LEN = 100
 
 
-def fitness(genotype):
-    """The more 1s are in the genotype, the higher the fitness.
+def fitness(phenotype):
+    """Calculated as the sum of the 1's by the length of the chromosome.
 
-    :return: The fitness of the genotype's phenotype.
+    :return: The fitness of the individual.
     """
-    return sum(genotype.genes) / len(genotype)
+    return sum(phenotype) / len(phenotype)
 
 
 class StopBecauseIAmWorthIt(Callback):

@@ -26,12 +26,16 @@ Fitness
 
 The dependent aspect of our problem is the answer to the question: how can we
 tell our algorithm how good an individual is? This is where the fitness comes
-into play, which we have implemented as follows:
+into play.
+
+The fitness can be any function that receives an object (representing an
+individual) and returns a float value where, the higher the value, the fitter
+the individual. We have implemented ours as follows.
 
 .. code-block:: python
 
-    def fitness(genotype):
-        return sum(genotype.genes) / len(genotype)
+def fitness(phenotype):
+    return sum(phenotype) / len(phenotype)
 
 This function returns a value that goes from 0 to 1 being 0 the worst that
 evolution has been able to create and 1 totally fit. In fact, any function that

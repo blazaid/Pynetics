@@ -39,13 +39,13 @@ TARGET = 'Hello, World!'
 TARGET_LEN = len(TARGET)
 
 
-def fitness(genotype):
+def fitness(phenotype):
     """The fitness will be based on the hamming distance error."""
     # Derive the phenotype from the genotype
-    phenotype = ''.join(str(x) for x in genotype)
+    sentence = ''.join(str(x) for x in phenotype)
     # Compute the error of this solution
     error = len([i for i in filter(
-        lambda x: x[0] != x[1], zip(phenotype, TARGET)
+        lambda x: x[0] != x[1], zip(sentence, TARGET)
     )])
     # Return the fitness according to that error
     return 1 / (1 + error)
@@ -63,7 +63,6 @@ class MyCallback(Callback):
 alphabet = Alphabet(
     genes=string.ascii_letters + string.punctuation + ' '
 )
-
 
 if __name__ == '__main__':
     ga = GeneticAlgorithm(

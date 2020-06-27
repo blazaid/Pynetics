@@ -200,20 +200,9 @@ class Genotype(metaclass=abc.ABCMeta):
         :return: The fitness of this particular genotype
         """
         if self.fitness_function is not None:
-            return self.fitness_function(self)
+            return self.fitness_function(self.phenotype())
         else:
             raise NotInitialized()
-
-    @abc.abstractmethod
-    def __eq__(self, other: object) -> bool:
-        """Equality operator between two genotypes.
-
-        Overriding is force to ensure the method differs from that
-        provided by default in python.
-
-        :param other: The other genotype to compare with.
-        :return: True if the two genotypes differ or false otherwise.
-        """
 
     def __ne__(self, other: object) -> bool:
         """Inequality operator (as the negation of the equality one).
@@ -222,6 +211,25 @@ class Genotype(metaclass=abc.ABCMeta):
         :return: True if the two genotypes differ or false otherwise.
         """
         return not (self == other)
+
+    @abc.abstractmethod
+    def phenotype(self) -> Any:
+        """Returns the phenotype associated to this genotype.
+
+        :return: The phenotype of this genotype as an object.
+        """
+
+    @abc.abstractmethod
+    def __eq__(self, other: object) -> bool:
+
+        """Equality operator between two genotypes.
+
+        Overriding is force to ensure the method differs from that
+        provided by default in python.
+
+        :param other: The other genotype to compare with.
+        :return: True if the two genotypes differ or false otherwise.
+        """
 
 
 class Initializer(metaclass=abc.ABCMeta):
