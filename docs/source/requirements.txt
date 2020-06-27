@@ -1,5 +1,5 @@
 Pygments==2.6.1
-renku-sphinx-theme=0.1.0
+renku-sphinx-theme==0.1.0
 rinoh-typeface-dejavuserif==0.1.1
 rinoh-typeface-texgyrecursor==0.1.1
 rinoh-typeface-texgyreheros==0.1.1
