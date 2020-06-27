@@ -64,10 +64,10 @@ class EvolutiveAlgorithm(metaclass=abc.ABCMeta):
         It is used to differentiate which event should be called in the
         algorithm  listeners subscribed to the class.
         """
-        ALGORITHM_BEGIN = 'on_algorithm_begin'
-        STEP_BEGIN = 'on_step_begin'
-        STEP_END = 'on_step_end'
-        ALGORITHM_END = 'on_algorithm_end'
+        ALGORITHM_BEGIN = 'on_algorithm_begins'
+        STEP_BEGIN = 'on_step_begins'
+        STEP_END = 'on_step_ends'
+        ALGORITHM_END = 'on_algorithm_ends'
 
     def __init__(
             self,

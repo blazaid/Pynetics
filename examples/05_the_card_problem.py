@@ -87,7 +87,7 @@ def fitness(genotype):
 
 
 class MyCallback(Callback):
-    def on_step_end(self, g):
+    def on_step_ends(self, g):
         print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
             g.generation,
             g.best().fitness(),

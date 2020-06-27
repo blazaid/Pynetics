@@ -12,6 +12,8 @@ pre-commit = "*"
 coverage = "*"
 mypy = "*"
 pylint = "*"
+renku-sphinx-theme = "*"
+rinohtype = "*"
 
 [packages]
 

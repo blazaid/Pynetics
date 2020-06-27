@@ -36,19 +36,19 @@ class TestCallback:
 
     def test_on_algorithm_begin(self):
         callback = Callback()
-        callback.on_algorithm_begin(Mock())
+        callback.on_algorithm_begins(Mock())
 
     def test_on_algorithm_end(self):
         callback = Callback()
-        callback.on_algorithm_end(Mock())
+        callback.on_algorithm_ends(Mock())
 
     def test_on_step_begin(self):
         callback = Callback()
-        callback.on_step_begin(Mock())
+        callback.on_step_begins(Mock())
 
     def test_on_step_end(self):
         callback = Callback()
-        callback.on_step_end(Mock())
+        callback.on_step_ends(Mock())
 
 
 class TestHistory:
@@ -67,7 +67,7 @@ class TestHistory:
         assert history.generation != 0
         assert history.data != {}
 
-        history.on_algorithm_begin(Mock())
+        history.on_algorithm_begins(Mock())
 
         assert history.generation == 0
         assert history.data == {}
@@ -86,7 +86,7 @@ class TestHistory:
         assert history.generation == 0
         assert history.data == {}
 
-        history.on_step_end(ga)
+        history.on_step_ends(ga)
 
         assert history.generation == 1
         assert history.data == {

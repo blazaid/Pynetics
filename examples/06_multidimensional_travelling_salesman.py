@@ -90,7 +90,7 @@ def fitness(genotype):
 
 
 class MyCallback(Callback):
-    def on_step_end(self, g):
+    def on_step_ends(self, g):
         best = g.best()
 
         path, total_distance = phenotype(best)

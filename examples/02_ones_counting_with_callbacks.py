@@ -46,20 +46,20 @@ def fitness(genotype):
 
 
 class MyCallback(Callback):
-    def on_algorithm_begin(self, g):
+    def on_algorithm_begins(self, g):
         print('Start algorithm')
 
-    def on_step_begin(self, g):
+    def on_step_begins(self, g):
         print('Starting step ... ', end='')
 
-    def on_step_end(self, g):
+    def on_step_ends(self, g):
         print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
             g.generation,
             g.best().fitness(),
             g.best(),
         ))
 
-    def on_algorithm_end(self, g):
+    def on_algorithm_ends(self, g):
         print('End algorithm')
 
 

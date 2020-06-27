@@ -49,14 +49,14 @@ def fitness(genotype):
 class StopBecauseIAmWorthIt(Callback):
     """Stops if there are n consecutive 1's in the genotype"""
 
-    def __init__(self, n):
-        self.n = n
-        self.ones = '1' * self.n
+    def __init__(self, m):
+        self.m = m
+        self.ones = '1' * self.m
 
-    def on_step_end(self, g):
+    def on_step_ends(self, g):
         for genotype in g.population:
             if self.ones in ''.join(map(str, genotype)):
-                print(f"Stopping because we found {self.n} consecutive 1's")
+                print(f"Stopping because we found {self.m} consecutive 1's")
                 g.stop()
 
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         recombination=(random_mask, 1.0),
         mutation=(RandomGene(BINARY), 1 / TARGET_LEN),
         replacement=(high_elitism, 0.7),
-        callbacks=[StopBecauseIAmWorthIt(42)]
+        callbacks=[StopBecauseIAmWorthIt(m=42)]
     )
 
     history = ga.run()

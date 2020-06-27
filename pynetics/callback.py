@@ -42,7 +42,7 @@ class Callback(metaclass=abc.ABCMeta):
     the problem constraints change in real time).
     """
 
-    def on_algorithm_begin(self, ga: api.EvolutiveAlgorithm):
+    def on_algorithm_begins(self, ga: api.EvolutiveAlgorithm):
         """The method to be called when the genetic algorithm starts.
 
         It will be called AFTER initialization but BEFORE the first
@@ -51,7 +51,7 @@ class Callback(metaclass=abc.ABCMeta):
         :param ga: The genetic algorithm that caused the event.
         """
 
-    def on_algorithm_end(self, ga: api.EvolutiveAlgorithm):
+    def on_algorithm_ends(self, ga: api.EvolutiveAlgorithm):
         """The method to be called when the genetic algorithm ends.
 
         It will be called AFTER the stop condition has been met.
@@ -60,7 +60,7 @@ class Callback(metaclass=abc.ABCMeta):
         """
         pass
 
-    def on_step_begin(self, ga: api.EvolutiveAlgorithm):
+    def on_step_begins(self, ga: api.EvolutiveAlgorithm):
         """The method to be called when an iteration step starts.
 
         It will be called AFTER the stop condition has been checked and
@@ -70,7 +70,7 @@ class Callback(metaclass=abc.ABCMeta):
         """
         pass
 
-    def on_step_end(self, ga: api.EvolutiveAlgorithm):
+    def on_step_ends(self, ga: api.EvolutiveAlgorithm):
         """The method to be called when an iteration step ends.
 
         It will be called AFTER an step of the algorithm has been
@@ -97,7 +97,7 @@ class History(Callback):
         self.generation: int = 0
         self.data: Dict = {}
 
-    def on_algorithm_begin(self, ga: api.EvolutiveAlgorithm):
+    def on_algorithm_begins(self, ga: api.EvolutiveAlgorithm):
         """When the algorithm starts, the parameters are reset.
 
         :param ga: The genetic algorithm that caused the event.
@@ -105,7 +105,7 @@ class History(Callback):
         self.generation = 0
         self.data.clear()
 
-    def on_step_end(self, ga: api.EvolutiveAlgorithm):
+    def on_step_ends(self, ga: api.EvolutiveAlgorithm):
         """Once a step is finished, some indicators are recorded.
 
         Those indicators include the best genotype instance and the best

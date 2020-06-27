@@ -91,10 +91,10 @@ class EvolutiveAlgorithmTests(GenericTest, metaclass=abc.ABCMeta):
 
     def test_callback_called(self):
         callback = Callback()
-        callback.on_algorithm_begin = Mock(side_effect=lambda *args: None)
-        callback.on_step_begin = Mock(side_effect=lambda *args: None)
-        callback.on_step_end = Mock(side_effect=lambda *args: None)
-        callback.on_algorithm_end = Mock(side_effect=lambda *args: None)
+        callback.on_algorithm_begins = Mock(side_effect=lambda *args: None)
+        callback.on_step_begins = Mock(side_effect=lambda *args: None)
+        callback.on_step_ends = Mock(side_effect=lambda *args: None)
+        callback.on_algorithm_ends = Mock(side_effect=lambda *args: None)
 
         algorithm = self.get_instance(
             stop_condition=NumSteps(2),
@@ -106,10 +106,10 @@ class EvolutiveAlgorithmTests(GenericTest, metaclass=abc.ABCMeta):
         algorithm.run()
 
         assert algorithm.generation == 2
-        callback.on_algorithm_begin.call_count = 1
-        callback.on_step_begin.call_count = 2
-        callback.on_step_end.call_count = 2
-        callback.on_algorithm_end.call_count = 1
+        callback.on_algorithm_begins.call_count = 1
+        callback.on_step_begins.call_count = 2
+        callback.on_step_ends.call_count = 2
+        callback.on_algorithm_ends.call_count = 1
 
     def test_stop_requested(self):
         algorithm = self.get_instance(stop_condition=NumSteps(2))

@@ -49,7 +49,7 @@ def fitness(genotype):
 
 if __name__ == '__main__':
     ga = GeneticAlgorithm(
-        population_size=4,
+        population_size=10,
         initializer=AlphabetInitializer(size=GENOTYPE_LEN, alphabet=BINARY),
         stop_condition=FitnessBound(1),
         fitness=fitness,

@@ -25,11 +25,12 @@
 
 This library provides the means to create genetic algorithms in a simple
 yet fast way. Specifically:
-  1. A generic and modular algorithm to be composed by the different
-  parts that build a whole algorithm.
-  2. Simple algorithm implementations with some defaults implemented.
-  3. Different generic operators (e.g. crossover or mutation) to work
-  with different genotypes (e.g. binary list, real list).
+
+1. A generic and modular algorithm to be composed by the different parts
+that build a whole algorithm.
+2. Simple algorithm implementations with some defaults implemented.
+3. Different generic operators (e.g. crossover or mutation) to work with
+different genotypes (e.g. binary list, real list).
 
 The fastest way to work with this library is by importing this file
 directly:
