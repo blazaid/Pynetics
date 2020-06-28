@@ -102,7 +102,8 @@ if __name__ == '__main__':
         fitness=fitness,
         selection=Tournament(2),
         recombination=(random_mask, 1.0),
-        mutation=(RandomGene(alphabet.BINARY), 1 / N),
+        mutation=RandomGene(alphabet.BINARY),
+        mutation_probability=1 / N,
         replacement=(low_elitism, 0.9),
         callbacks=[MyCallback()]
     )

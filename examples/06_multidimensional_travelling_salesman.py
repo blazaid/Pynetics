@@ -107,7 +107,8 @@ if __name__ == '__main__':
         fitness=fitness,
         selection=Tournament(2),
         recombination=(pmx, 1.0),
-        mutation=(swap_genes, 2 / N),
+        mutation=swap_genes,
+        mutation_probability=1 / N,
         replacement=(low_elitism, 0.9),
         callbacks=[MyCallback()]
     )

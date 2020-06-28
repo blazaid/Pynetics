@@ -31,9 +31,10 @@ import inspect
 import math
 import random
 from collections import Sequence
-from typing import Tuple
+from typing import Tuple, Optional
 
 from . import api, callback
+from .api import Mutation
 from .exception import NotInitialized
 from .util import take_chances
 
@@ -42,7 +43,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
     """Modular implementation of a canonical genetic algorithm.
 
     Each step the algorithm will generate a new offspring population
-    from the previous one, andthen invoke the replacement schema to
+    from the previous one, and then invoke the replacement schema to
     combine the old and new genotypes in a new population ready to use
     in a new algorithm step.
 
@@ -59,8 +60,9 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             fitness: api.Fitness,
             selection: api.Selection,
             recombination: Tuple[api.Recombination, float],
-            mutation: Tuple[api.Mutation, float],
             replacement: Tuple[api.Replacement, float],
+            mutation: Optional[api.Mutation] = None,
+            mutation_probability: Optional[float] = None,
             callbacks: Sequence[callback.Callback] = None,
     ):
         """Initializes this object
@@ -76,10 +78,12 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             as the first element, and the probability for two phenotypes
             to be recombined as the second one. The probability must be
             a float value belonging to the [0, 1) interval.
-        :param mutation: A tuple with the mutation algorithm as the
-            first element, and the probability for a phenotype to
-            mutate as the second one. The probability must be a float
-            value belonging to the [0, 1) interval.
+        :param mutation: The mutation algorithm to apply to the
+            genotypes.
+        :param mutation_probability: The probability for a genotype to
+            mutate. It must be a numeric value (or a string with a float
+            value in it) belonging to the [0, 1] interval. Any value out
+            of that interval will be truncated.
         :param replacement: A tuple with the replacement algorithm as
             the first element, and the replacement rate for a phenotypes
             to mutate. The probability must be a float value belonging
@@ -94,9 +98,14 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         self.fitness = fitness
         self.selection = selection
         self.recombination, self.p_recombination = recombination
-        self.mutation, self.p_mutation = mutation
-        self.replacement, self.replacement_rate = replacement
 
+        # The mutation is optional, so in case no mutation is provided,
+        # the mutation operation will be the identity (that is, return
+        # the same, unmodified, genotype.
+        self.mutation = mutation
+        self.mutation_probability = mutation_probability
+
+        self.replacement, self.replacement_rate = replacement
         # The offspring size is based on the original population size
         # and the replacement rate
         self.offspring_size = math.ceil(
@@ -113,6 +122,22 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         # always contain the population corresponding to the current
         # generation.
         self.population = api.Population(self.population_size, self.fitness)
+
+    @property
+    def mutation(self) -> Mutation:
+        return self.__mutation
+
+    @mutation.setter
+    def mutation(self, mutation: Mutation):
+        self.__mutation = mutation or (lambda _, g: g)
+
+    @property
+    def mutation_probability(self) -> float:
+        return self.__mutation_probability
+
+    @mutation_probability.setter
+    def mutation_probability(self, probability: float):
+        self.__mutation_probability = max(min(float(probability), 1), 0)
 
     def on_initialize(self):
         # Renew the population
@@ -151,7 +176,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
 
             # Mutate the genotypes if there is a chance
             mutated_progeny = (
-                self.mutation(self.p_mutation, g)
+                self.mutation(self.mutation_probability, g)
                 for g in selected
             )
 

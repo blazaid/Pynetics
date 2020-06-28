@@ -36,7 +36,7 @@ from pynetics.replacement import high_elitism
 from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
-GENOTYPE_LEN = 50
+TARGET_LEN = 50
 
 
 def fitness(phenotype):
@@ -50,12 +50,13 @@ def fitness(phenotype):
 if __name__ == '__main__':
     ga = GeneticAlgorithm(
         population_size=10,
-        initializer=AlphabetInitializer(size=GENOTYPE_LEN, alphabet=BINARY),
+        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=BINARY),
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(3),
         recombination=(random_mask, 1.0),
-        mutation=(RandomGene(BINARY), 1 / GENOTYPE_LEN),
+        mutation=RandomGene(BINARY),
+        mutation_probability=1 / TARGET_LEN,
         replacement=(high_elitism, 1.0),
     )
 

@@ -14,7 +14,7 @@ In the example, we've established the genotype size via the next sentence:
 
 .. code-block:: python
 
-   GENOTYPE_LEN = 50
+   TARGET_LEN = 50
 
 We don't really need to code almost anything else. Pynetics has a set of
 components for list-based genetic algorithms that can be used for this kind of
@@ -58,12 +58,12 @@ We're going to write down all the settings and comment on them in parts:
 
     ga = GeneticAlgorithm(
         population_size=10,
-        initializer=AlphabetInitializer(size=GENOTYPE_LEN, alphabet=BINARY),
+        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=BINARY),
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(3),
         recombination=(random_mask, 1.0),
-        mutation=(RandomGene(BINARY), 1 / GENOTYPE_LEN),
+        mutation=(RandomGene(BINARY), 1 / TARGET_LEN),
         replacement=(high_elitism, 1.0),
     )
 

@@ -44,7 +44,8 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
             fitness=kwargs.get('fitness', Mock()),
             selection=kwargs.get('selection', Mock()),
             recombination=kwargs.get('recombination', (Mock(), 1.0)),
-            mutation=kwargs.get('mutation', (Mock(), 1.0)),
+            mutation=kwargs.get('mutation', Mock()),
+            mutation_probability=kwargs.get('mutation_probability', 1.0),
             replacement=kwargs.get('replacement', (Mock(), 1.0)),
             callbacks=kwargs.get('callbacks', []),
         )
@@ -56,6 +57,23 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
     def test_cannot_get_best_if_not_initialized(self):
         with pytest.raises(NotInitialized):
             self.get_instance().best()
+
+    @pytest.mark.parametrize('prob, exp', [
+        (0, 0), (0.5, 0.5), (1, 1),
+        (-1, 0), (2, 1),
+        ('-1', 0), ('0', 0), ('0.5', 0.5), ('1', 1), ('2', 1),
+    ])
+    def test_mutation_probability_always_between_0_and_1(self, prob, exp):
+        ga = self.get_instance(mutation_probability=prob)
+
+        assert ga.mutation_probability == exp
+
+    @pytest.mark.parametrize('prob', [p / 10 for p in range(11)])
+    def test_mutation_is_optional(self, prob):
+        ga = self.get_instance(mutation_probability=prob, mutation=None)
+
+        genotype = Mock()
+        assert ga.mutation(prob, genotype) is genotype
 
     def test_all_elements_are_called(self):
         def mock_replacement(*, population, offspring):
@@ -71,7 +89,8 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
             population_size=population_size,
             selection=selection,
             recombination=(recombination, 1.0),
-            mutation=(mutation, 1.0),
+            mutation=mutation,
+            mutation_probability=1.0,
             replacement=(replacement, 1.0),
             mock_population=True
         )
