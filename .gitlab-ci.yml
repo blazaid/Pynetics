@@ -14,6 +14,9 @@ flake8:
   stage: Static analysis
   script:
     - pipenv run flake8
+  only:
+    - master
+    - devel
 
 pytest:
   stage: Test
@@ -21,6 +24,9 @@ pytest:
     - pipenv run coverage run --source pynetics -m pytest tests
     - pipenv run coverage xml -o coverage.xml
     - pipenv run coverage report -m
+  only:
+    - master
+    - devel
 
 pypi:
   stage: Deploy
