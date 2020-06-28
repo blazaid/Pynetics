@@ -88,7 +88,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         :param replacement: A tuple with the replacement algorithm as
             the first element, and the replacement rate for a phenotypes
             to mutate. The probability must be a float value belonging
-            to the [0, 1) interval.
+            to the [0, 1] interval.
         :param callbacks: TODO TBD...
         """
         super().__init__(stop_condition=stop_condition, callbacks=callbacks)
