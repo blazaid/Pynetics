@@ -85,12 +85,13 @@ Those settings are mandatory and are specified here:
 - :code:`selection`: Which operator the algorithm will use in order to select
   individuals from the population. We use a `tournament selection` schema with
   3 random genotypes.
-- :code:`recombination`: A tuple with a recombination algorithm and the actual
-  probability for the individuals to actually match. In this case, we're using a
-  `random mask` recombination schema with a probability of 1 (there'll always be
-  a match).
-- :code:`mutation`: Like the recombination, but with the mutation. In our case
-  we sill work with a `random gene` schema with a low probability.
+- :code:`recombination` and :code:`recombination_probability`: A recombination
+  algorithm and the actual probability for the individuals to actually match.
+  In this case, we're using a `random mask` recombination schema with a
+  probability of 1 (i.e. there'll always be a match).
+- :code:`mutation` and :code:`mutation_probability`: Like the previous two, but
+  this time with the mutation. In our case we'll' work with a `random_gene`
+  schema with a low probability.
 - :code:`replacement`: Which replacement schema to use and the replacement
   ratio (percentage of how many individuals are needed in the offspring to
   actually replace populations. We will use a `high elitism` schema with a 100%

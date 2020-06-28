@@ -34,7 +34,6 @@ from collections import Sequence
 from typing import Tuple, Optional
 
 from . import api, callback
-from .api import Mutation
 from .exception import NotInitialized
 from .util import take_chances
 
@@ -59,8 +58,9 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             stop_condition: api.StopCondition,
             fitness: api.Fitness,
             selection: api.Selection,
-            recombination: Tuple[api.Recombination, float],
             replacement: Tuple[api.Replacement, float],
+            recombination: api.Recombination = None,
+            recombination_probability: float = None,
             mutation: Optional[api.Mutation] = None,
             mutation_probability: Optional[float] = None,
             callbacks: Sequence[callback.Callback] = None,
@@ -74,12 +74,13 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         :param fitness: TODO TBD
         :param selection: The algorithm that selects one phenotype
             from the population.
-        :param recombination: A tuple with the recombination algorithm
-            as the first element, and the probability for two phenotypes
-            to be recombined as the second one. The probability must be
-            a float value belonging to the [0, 1) interval.
-        :param mutation: The mutation algorithm to apply to the
-            genotypes.
+        :param recombination: The recombination schema to apply to the
+            selected genotypes.
+        :param recombination_probability: The probability for some
+            genotypes to be recombined. It must be a numeric value (or a
+            string with a float value in it) belonging to the [0, 1]
+            interval. Any value out of that interval will be truncated.
+        :param mutation: The mutation schema to apply to the genotypes.
         :param mutation_probability: The probability for a genotype to
             mutate. It must be a numeric value (or a string with a float
             value in it) belonging to the [0, 1] interval. Any value out
@@ -97,7 +98,12 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         self.stop_condition = stop_condition
         self.fitness = fitness
         self.selection = selection
-        self.recombination, self.p_recombination = recombination
+
+        # The recombination is optional, so in case no recombination is
+        # provided, the mutation operation will be the identity (that
+        # is, return the same, unmodified, genotypes.
+        self.recombination = recombination
+        self.recombination_probability = recombination_probability
 
         # The mutation is optional, so in case no mutation is provided,
         # the mutation operation will be the identity (that is, return
@@ -124,19 +130,47 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         self.population = api.Population(self.population_size, self.fitness)
 
     @property
-    def mutation(self) -> Mutation:
+    def recombination(self) -> api.Recombination:
+        """TODO TBD"""
+        return self.__recombination
+
+    @recombination.setter
+    def recombination(self, recombination: api.Recombination):
+        """TODO TBD"""
+        self.__recombination = recombination or (lambda *g: g)
+
+    @property
+    def recombination_probability(self) -> float:
+        """TODO TBD"""
+        return self.__recombination_probability
+
+    @recombination_probability.setter
+    def recombination_probability(self, probability: float):
+        """TODO TBD"""
+        if probability is None:
+            probability = 0
+        self.__recombination_probability = max(min(float(probability), 1), 0)
+
+    @property
+    def mutation(self) -> api.Mutation:
+        """TODO TBD"""
         return self.__mutation
 
     @mutation.setter
-    def mutation(self, mutation: Mutation):
+    def mutation(self, mutation: api.Mutation):
+        """TODO TBD"""
         self.__mutation = mutation or (lambda _, g: g)
 
     @property
     def mutation_probability(self) -> float:
+        """TODO TBD"""
         return self.__mutation_probability
 
     @mutation_probability.setter
     def mutation_probability(self, probability: float):
+        """TODO TBD"""
+        if probability is None:
+            probability = 0
         self.__mutation_probability = max(min(float(probability), 1), 0)
 
     def on_initialize(self):
@@ -166,7 +200,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             selected = self.selection(self.population, self.selection_size)
 
             # Recombine the selected genotypes to get the new progeny
-            if take_chances(self.p_recombination):
+            if take_chances(self.recombination_probability):
                 selected = self.recombination(*selected)
 
             # Adjust the progeny size to avoid the problem of ending

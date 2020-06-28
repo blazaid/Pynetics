@@ -93,15 +93,9 @@ that the :code:`ListGenotype` class to use is out implementation.
 .. code-block:: python
 
     ga = GeneticAlgorithm(
-        population_size=10,
+        # ... Stuff ...
         initializer=AlphabetInitializer(
             size=N, alphabet=alphabet.BINARY, cls=CardsGenotype
         ),
-        stop_condition=FitnessBound(1),
-        fitness=fitness,
-        selection=Tournament(2),
-        recombination=(random_mask, 1.0),
-        mutation=(RandomGene(alphabet.BINARY), 1 / N),
-        replacement=(low_elitism, 0.9),
-        callbacks=[MyCallback()]
+        # ... More stuff ...
     )

@@ -95,3 +95,11 @@ default operators.
         replacement=(high_elitism, 1.0),
         callbacks=[MyCallback()]
     )
+
+    ga = GeneticAlgorithm(
+        # ... Stuff ...
+        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=alphabet),
+        # ... More stuff ...
+        mutation=(RandomGene(alphabet), 1 / TARGET_LEN),
+        # ... Even more stuff ...
+    )

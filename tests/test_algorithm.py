@@ -43,7 +43,10 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
             stop_condition=kwargs.get('stop_condition', Mock()),
             fitness=kwargs.get('fitness', Mock()),
             selection=kwargs.get('selection', Mock()),
-            recombination=kwargs.get('recombination', (Mock(), 1.0)),
+            recombination=kwargs.get('recombination', Mock()),
+            recombination_probability=kwargs.get(
+                'recombination_probability', 1.0
+            ),
             mutation=kwargs.get('mutation', Mock()),
             mutation_probability=kwargs.get('mutation_probability', 1.0),
             replacement=kwargs.get('replacement', (Mock(), 1.0)),
@@ -59,9 +62,25 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
             self.get_instance().best()
 
     @pytest.mark.parametrize('prob, exp', [
-        (0, 0), (0.5, 0.5), (1, 1),
-        (-1, 0), (2, 1),
-        ('-1', 0), ('0', 0), ('0.5', 0.5), ('1', 1), ('2', 1),
+        (0, 0), (0.5, 0.5), (1, 1), (-1, 0), (2, 1), ('0.5', 0.5), (None, 0),
+    ])
+    def test_recombination_probability_always_between_0_and_1(self, prob, exp):
+        ga = self.get_instance(recombination_probability=prob)
+
+        assert ga.recombination_probability == exp
+
+    @pytest.mark.parametrize('prob', [p / 10 for p in range(11)])
+    def test_recombination_is_optional(self, prob):
+        ga = self.get_instance(
+            recombination_probability=prob, recombination=None
+        )
+
+        parents = Mock(), Mock()
+        for child in ga.recombination(*parents):
+            assert child is parents[0] or child is parents[1]
+
+    @pytest.mark.parametrize('prob, exp', [
+        (0, 0), (0.5, 0.5), (1, 1), (-1, 0), (2, 1), ('0.5', 0.5), (None, 0),
     ])
     def test_mutation_probability_always_between_0_and_1(self, prob, exp):
         ga = self.get_instance(mutation_probability=prob)
@@ -88,7 +107,8 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
         ga = self.get_instance(
             population_size=population_size,
             selection=selection,
-            recombination=(recombination, 1.0),
+            recombination=recombination,
+            recombination_probability=1.0,
             mutation=mutation,
             mutation_probability=1.0,
             replacement=(replacement, 1.0),

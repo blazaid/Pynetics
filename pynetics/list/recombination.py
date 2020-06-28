@@ -61,9 +61,7 @@ class NPivot:
         self.num_pivots = num_pivots
 
     def __call__(
-            self,
-            parent1: ListGenotype,
-            parent2: ListGenotype
+            self, parent1: ListGenotype, parent2: ListGenotype
     ) -> Tuple[ListGenotype, ListGenotype]:
         """The specific crossover logic.
 
@@ -104,8 +102,7 @@ two_point_crossover = NPivot(num_pivots=2)
 
 
 def pmx(
-        parent1: ListGenotype,
-        parent2: ListGenotype,
+        parent1: ListGenotype, parent2: ListGenotype,
 ) -> Tuple[ListGenotype, ListGenotype]:
     """TODO TBD...
 
@@ -150,8 +147,7 @@ def pmx(
 
 
 def random_mask(
-        parent1: ListGenotype,
-        parent2: ListGenotype
+        parent1: ListGenotype, parent2: ListGenotype
 ) -> Tuple[ListGenotype, ListGenotype]:
     """Progeny is created by using a random mask.
 
