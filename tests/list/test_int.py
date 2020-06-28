@@ -34,12 +34,14 @@ from tests.util import random_sequence
 
 
 class TestIntegerIntervalInitializer(IntervalInitializerTests):
-    def get_instance(self, size=None, **kwargs):
-        size = 10 if size is None else size
+    def get_instance(self, **kwargs):
+        size = kwargs.get('size', 10)
         lower = kwargs.get('lower', 0)
-        upper = kwargs.get('upper', 10)
-
-        return IntegerIntervalInitializer(size=size, lower=lower, upper=upper)
+        upper = kwargs.get('upper', 1)
+        cls = kwargs.get('cls', None)
+        return IntegerIntervalInitializer(
+            size=size, lower=lower, upper=upper, cls=cls
+        )
 
     @pytest.mark.parametrize('lower, upper, size', [
         (0, 1, 100),

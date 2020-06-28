@@ -36,6 +36,7 @@ from pynetics.list.alphabet import (
     GENETIC_CODE,
 )
 from pynetics.list.exception import NotEnoughSymbolsInAlphabet
+from pynetics.list.genotype import ListGenotype
 from pynetics.list.initializer import (
     AlphabetInitializer,
     PermutationInitializer,
@@ -46,7 +47,18 @@ from tests.test_api import InitializerTests
 # ~~~~~~~~~~~~~
 # Generic tests
 # ~~~~~~~~~~~~~
-class IntervalInitializerTests(InitializerTests, metaclass=abc.ABCMeta):
+class ListInitializerTests(InitializerTests, metaclass=abc.ABCMeta):
+
+    def test_initialize_with_different_genotype_class(self):
+        class MyListGenotype(ListGenotype):
+            pass
+
+        initializer = self.get_instance(cls=MyListGenotype)
+
+        assert type(initializer.create()) is MyListGenotype
+
+
+class IntervalInitializerTests(ListInitializerTests, metaclass=abc.ABCMeta):
     @pytest.mark.parametrize('lower, upper', [(0, 1), (0, 10), (1, 10)])
     def test_correct_lower_and_upper_bounds(self, lower, upper):
         initializer = self.get_instance(lower=lower, upper=upper)
@@ -76,11 +88,12 @@ class IntervalInitializerTests(InitializerTests, metaclass=abc.ABCMeta):
 # ~~~~~~~~~~~~~~
 # Specific tests
 # ~~~~~~~~~~~~~~
-class TestAlphabetInitializer(InitializerTests):
-    def get_instance(self, size=None, alphabet=None, **kwargs):
-        size = 4 if size is None else size
-        alphabet = GENETIC_CODE if alphabet is None else alphabet
-        return AlphabetInitializer(size=size, alphabet=alphabet)
+class TestAlphabetInitializer(ListInitializerTests):
+    def get_instance(self, **kwargs):
+        size = kwargs.get('size', 4)
+        alphabet = kwargs.get('alphabet', GENETIC_CODE)
+        cls = kwargs.get('cls', None)
+        return AlphabetInitializer(size=size, alphabet=alphabet, cls=cls)
 
     @pytest.mark.parametrize('alphabet', [
         BINARY, NIBBLE, OCTAL, DECIMAL, HEXADECIMAL, GENETIC_CODE
@@ -95,11 +108,12 @@ class TestAlphabetInitializer(InitializerTests):
             assert g in alphabet.genes
 
 
-class TestPermutationInitializer(InitializerTests):
-    def get_instance(self, size=None, alphabet=None, **kwargs):
-        size = 4 if size is None else size
-        alphabet = GENETIC_CODE if alphabet is None else alphabet
-        return PermutationInitializer(size=size, alphabet=alphabet)
+class TestPermutationInitializer(ListInitializerTests):
+    def get_instance(self, **kwargs):
+        size = kwargs.get('size', 4)
+        alphabet = kwargs.get('alphabet', GENETIC_CODE)
+        cls = kwargs.get('cls', None)
+        return PermutationInitializer(size=size, alphabet=alphabet, cls=cls)
 
     @pytest.mark.parametrize('alphabet, size', [
         (BINARY, len(BINARY) + 1),

@@ -23,8 +23,8 @@
 # ======================================================================
 """The card problem: You've got a deck of N cards numbered from 1 to N.
 The idea is to divide the deck in two piles where the cards in one pile
-sum as close as possible to 36 and the ones in the other multiply as
-closer as possible to 360.
+sum as close as possible to I and the ones in the other multiply as
+close as possible to J.
 """
 import operator
 from functools import reduce
@@ -32,6 +32,7 @@ from functools import reduce
 from pynetics.algorithm import GeneticAlgorithm
 from pynetics.callback import Callback
 from pynetics.list import alphabet
+from pynetics.list.genotype import ListGenotype
 from pynetics.list.initializer import AlphabetInitializer
 from pynetics.list.mutation import RandomGene
 from pynetics.list.recombination import random_mask
@@ -40,8 +41,8 @@ from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
 N = 10  # How many cards in our deck
-TARGET_1 = 36  # Sum target
-TARGET_2 = 360  # Product target
+TARGET_I = 36  # Sum target
+TARGET_J = 360  # Product target
 
 
 # Encoding
@@ -51,34 +52,30 @@ TARGET_2 = 360  # Product target
 # values 1 to 10) and each gene value can represent the deck where the
 # card is placed (values 0 or 1 to decks 1 or 2).
 #
-# So a ListGenotype is enough, and the SimpleGA algorithm uses one
-# underneath with binary encoding.
-#
-# We are going to write a helper method in order to represent the
-# individual
-#
-# TODO Move phenotype function to a method of genotype
-def extract_decks(phenotype):
-    """The phenotype will be a tuple of two decks containing a list of
-    the cards included on that decks."""
-    # Those positions marked as 0 will belong to the deck 1 (sum)
-    deck1 = [i for (i, g) in enumerate(phenotype, start=1) if g == 0]
-    # Those positions marked as 1 will belong to the deck 2 (productS)
-    deck2 = [i for (i, g) in enumerate(phenotype, start=1) if g == 1]
+# So a ListGenotype is enough, but we're gonna show how to extend its
+# behaviour by providing it a new phenotype method.
+class CardsGenotype(ListGenotype):
+    def phenotype(self):
+        """The phenotype will be a tuple of two decks containing a list
+        of the cards included on that decks."""
+        # Those positions marked as 0 will belong to the deck 1 (sum)
+        deck1 = [i for (i, g) in enumerate(self, start=1) if g == 0]
+        # Those positions marked as 1 will belong to the deck 2 (productS)
+        deck2 = [i for (i, g) in enumerate(self, start=1) if g == 1]
 
-    return deck1, deck2
+        return deck1, deck2
 
 
 def fitness(phenotype):
     """Fitness will be based on the distance error to the target values.
 
     The error will be the sum of both errors, which will be computed as
-    RMSE to the targets.
+    the difference to the targets.
     """
-    deck1, deck2 = extract_decks(phenotype)
+    deck1, deck2 = phenotype
 
-    error1 = abs((sum(deck1) - TARGET_1) / TARGET_1)
-    error2 = abs((reduce(operator.mul, deck2, 1) - TARGET_2) / TARGET_2)
+    error1 = abs((sum(deck1) - TARGET_I) / TARGET_I)
+    error2 = abs((reduce(operator.mul, deck2, 1) - TARGET_J) / TARGET_J)
 
     error = error1 + error2
 
@@ -91,14 +88,16 @@ class MyCallback(Callback):
         print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
             g.generation,
             g.best().fitness(),
-            extract_decks(g.best().route_and_distance()),
+            g.best().phenotype(),
         ))
 
 
 if __name__ == '__main__':
     ga = GeneticAlgorithm(
         population_size=10,
-        initializer=AlphabetInitializer(size=N, alphabet=alphabet.BINARY),
+        initializer=AlphabetInitializer(
+            size=N, alphabet=alphabet.BINARY, cls=CardsGenotype
+        ),
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(2),

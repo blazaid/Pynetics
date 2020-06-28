@@ -14,5 +14,5 @@ the root directory of the library.
     ones_counting_with_callbacks
     ones_counting_finish_abruptly
     hello_world
-..    the_card_problem
+    two_decks_problem
 ..    multidimensional_travelling_salesman

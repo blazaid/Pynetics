@@ -214,9 +214,9 @@ class Genotype(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def phenotype(self) -> Any:
-        """Returns the phenotype associated to this genotype.
+        """The phenotype resulting from this genotype.
 
-        :return: The phenotype of this genotype as an object.
+        :return: An object representing the phenotype of this genotype.
         """
 
     @abc.abstractmethod
@@ -467,7 +467,7 @@ class Population(MutableSequence[Genotype]):
 Diversity = Callable[[Any], float]
 Fitness = Callable[[Any], float]
 Mutation = Callable[[float, Genotype], Genotype]
-Recombination = Callable[[Genotype], Genotype]
+Recombination = Callable[[Iterable[Genotype]], Genotype]
 Replacement = Callable[[Population, Population], Population]
 Selection = Callable[[Population, int], Tuple[Genotype, ...]]
 StopCondition = Callable[[EvolutiveAlgorithm], bool]

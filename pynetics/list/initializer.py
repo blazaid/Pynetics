@@ -26,6 +26,7 @@
 from __future__ import annotations
 
 import abc
+from typing import Type
 
 from .alphabet import Alphabet
 from .exception import NotEnoughSymbolsInAlphabet
@@ -41,13 +42,16 @@ from ..util import Number
 class ListGenotypeInitializer(api.Initializer, metaclass=abc.ABCMeta):
     """Common behaviour between initializers."""
 
-    def __init__(self, *, size: int):
+    def __init__(self, *, size: int, cls: ListGenotype.__class__):
         """Initializes this object.
 
         :param size: The size of the genotypes this initializer will
             generate. Must be greater than 0.
+        :param cls: The class of the genotype to create. In not
+            specified, it defaults to :py:class`.genotype.ListGenotype`.
         """
         self.size = size
+        self.cls = cls
 
 
 # ~~~~~~~~~~~~
@@ -56,13 +60,18 @@ class ListGenotypeInitializer(api.Initializer, metaclass=abc.ABCMeta):
 class AlphabetInitializer(ListGenotypeInitializer):
     """Initializer for ListGenotype based on an arbitrary alphabet."""
 
-    def __init__(self, size: int, alphabet: Alphabet):
+    def __init__(
+            self, *,
+            size: int,
+            alphabet: Alphabet,
+            cls: Type[ListGenotype] = None
+    ):
         """Initializes this object.
 
         :param size: The size of the genotypes to generate.
         :param alphabet: The possible values to fill each gene position.
         """
-        super().__init__(size=size)
+        super().__init__(size=size, cls=cls or ListGenotype)
         self.alphabet = alphabet
 
     def create(self) -> ListGenotype:
@@ -70,15 +79,20 @@ class AlphabetInitializer(ListGenotypeInitializer):
 
         :return: A new ListGenotype instance.
         """
-        return ListGenotype(genes=self.alphabet.get(n=self.size))
+        return self.cls(genes=self.alphabet.get(n=self.size))
 
 
 class PermutationInitializer(ListGenotypeInitializer):
     """TODO TBD..."""
 
-    def __init__(self, size: int, alphabet: Alphabet):
+    def __init__(
+            self, *,
+            size: int,
+            alphabet: Alphabet,
+            cls: Type[ListGenotype] = None
+    ):
         """TODO TBD..."""
-        super().__init__(size=size)
+        super().__init__(size=size, cls=cls or ListGenotype)
         self.alphabet = alphabet
         if self.size > len(alphabet):
             raise NotEnoughSymbolsInAlphabet(
@@ -94,7 +108,7 @@ class PermutationInitializer(ListGenotypeInitializer):
         genes = self.alphabet.get(n=self.size, rep=False)
         if self.size == 1:
             genes = [genes]
-        return ListGenotype(genes=genes)
+        return self.cls(genes=genes)
 
 
 class IntervalInitializer(ListGenotypeInitializer, metaclass=abc.ABCMeta):
@@ -104,7 +118,13 @@ class IntervalInitializer(ListGenotypeInitializer, metaclass=abc.ABCMeta):
     genotypes of either integer or real genes.
     """
 
-    def __init__(self, *, size: int, lower: Number, upper: Number):
+    def __init__(
+            self, *,
+            size: int,
+            lower: Number,
+            upper: Number,
+            cls: Type[ListGenotype] = None
+    ):
         """Initializes this object.
 
         :param size: The size of the genotypes to generate.
@@ -114,7 +134,7 @@ class IntervalInitializer(ListGenotypeInitializer, metaclass=abc.ABCMeta):
         :raise BoundsCannotBeTheSame: If the two bounds have the same
         value.
         """
-        super().__init__(size=size)
+        super().__init__(size=size, cls=cls or ListGenotype)
 
         if lower == upper:
             raise BoundsCannotBeTheSame(lower)
@@ -125,7 +145,7 @@ class IntervalInitializer(ListGenotypeInitializer, metaclass=abc.ABCMeta):
 
         :return: A new genotype instance.
         """
-        return ListGenotype(genes=(
+        return self.cls(genes=(
             self.get_value_from_interval() for _ in range(self.size)
         ))
 
