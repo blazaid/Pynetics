@@ -5,6 +5,18 @@ This document holds all the changes in the project.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning]
 
+## 0.7.0 - 2020-06-28
+- The `Genotype` class now has a `phenotype` abstract method that must be
+ overrode to obtain the individual. This phenotype is the object to be used as
+ argument in the `fitness` method.
+- The ListGenotype class has been modified to provide a default phenotype
+ implementation.
+- The `Initializer` subclasses that deal with `ListGenotype` instances now
+ accept a class that indicates which `ListGenotype` subclass to use. If not
+ specified, the base `ListGenotype` is used.
+- Arguments `recombination` and `mutation` are now optional parameters in the
+ `GeneticAlgorithm` class.
+
 ## 0.6.1 - 2020-06-20
 - Fixed CI/CD configuration for deployment on PyPi.
 
