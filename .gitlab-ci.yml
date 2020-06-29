@@ -38,4 +38,5 @@ pypi:
     # - pipenv run twine check dist/*
     - pipenv run twine upload dist/*
   only:
-    - tags
+    - master
+    - devel
