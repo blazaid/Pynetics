@@ -59,7 +59,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             fitness: api.Fitness,
             selection: api.Selection,
             replacement: Tuple[api.Replacement, float],
-            recombination: api.Recombination = None,
+            recombination: Optional[api.Recombination] = None,
             recombination_probability: float = None,
             mutation: Optional[api.Mutation] = None,
             mutation_probability: Optional[float] = None,
@@ -179,13 +179,11 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         self.initializer.fill(self.population)
 
     def on_finalize(self):
+        """It does nothing """
         pass
 
     def step(self):
-        """The particular implementation of this genetic algorithm.
-
-        The inner working is as follows:
-        """
+        """The particular implementation of this genetic algorithm."""
         # Create the new empty population to hold the new offspring.
         offspring = api.Population(
             size=self.offspring_size,
@@ -197,16 +195,22 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         while not offspring.full():
             # Select the required number of genotypes according to the
             # needed by the crossover algorithm
-            selected = self.selection(self.population, self.selection_size)
+            parents = self.selection(self.population, self.selection_size)
 
             # Recombine the selected genotypes to get the new progeny
             if take_chances(self.recombination_probability):
-                selected = self.recombination(*selected)
+                progeny = self.recombination(*parents)
+                # These are new genotypes, so we're identifying their
+                # parents to keep the evolutionary tree
+                for genotype in progeny:
+                    genotype.add_parents(*parents)
+            else:
+                progeny = parents
 
             # Adjust the progeny size to avoid the problem of ending
             # with a new population of different size
-            size = min(len(selected), offspring.max_size - len(offspring))
-            selected = (g for g in random.sample(selected, size))
+            size = min(len(progeny), offspring.max_size - len(offspring))
+            selected = (g for g in random.sample(progeny, size))
 
             # Mutate the genotypes if there is a chance
             mutated_progeny = (

@@ -36,20 +36,31 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
     """Tests for GeneticAlgorithm class."""
 
     def get_instance(self, **kwargs):
+        def mock_replacement(*, population, offspring):
+            return offspring
+
         population_size = kwargs.get('population_size', 10)
         ga = GeneticAlgorithm(
             population_size=population_size,
             initializer=kwargs.get('initializer', Mock()),
             stop_condition=kwargs.get('stop_condition', Mock()),
             fitness=kwargs.get('fitness', Mock()),
-            selection=kwargs.get('selection', Mock()),
-            recombination=kwargs.get('recombination', Mock()),
+            selection=kwargs.get(
+                'selection', Mock(side_effect=lambda p, _: p[:2])
+            ),
+            recombination=kwargs.get(
+                'recombination', Mock(side_effect=lambda *gs: gs)
+            ),
             recombination_probability=kwargs.get(
                 'recombination_probability', 1.0
             ),
-            mutation=kwargs.get('mutation', Mock()),
+            mutation=kwargs.get(
+                'mutation', Mock(side_effect=lambda p, g: g)
+            ),
             mutation_probability=kwargs.get('mutation_probability', 1.0),
-            replacement=kwargs.get('replacement', (Mock(), 1.0)),
+            replacement=kwargs.get(
+                'replacement', (Mock(side_effect=mock_replacement), 1.0)
+            ),
             callbacks=kwargs.get('callbacks', []),
         )
         if kwargs.get('mock_population', False):
@@ -94,32 +105,28 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
         genotype = Mock()
         assert ga.mutation(prob, genotype) is genotype
 
-    def test_all_elements_are_called(self):
-        def mock_replacement(*, population, offspring):
-            return offspring
-
-        population_size = 10
-        selection = Mock(side_effect=lambda p, _: p[:2])
-        recombination = Mock(side_effect=lambda *gs: gs)
-        mutation = Mock(side_effect=lambda p, g: g)
-        replacement = Mock(side_effect=mock_replacement)
-
+    def test_no_recombination_probability(self):
         ga = self.get_instance(
-            population_size=population_size,
-            selection=selection,
-            recombination=recombination,
-            recombination_probability=1.0,
-            mutation=mutation,
-            mutation_probability=1.0,
-            replacement=(replacement, 1.0),
-            mock_population=True
+            population_size=2,
+            recombination_probability=0.0,
+            mock_population=True,
         )
-        ga.population = build_population(size=population_size)
+        population = ga.population
+        ga.step()
+        offspring = ga.population
+
+        for genotype in population:
+            assert genotype in offspring
+        for genotype in offspring:
+            assert genotype in population
+
+    def test_all_elements_are_called(self):
+        ga = self.get_instance(population_size=10, mock_population=True)
 
         ga.step()
 
-        assert selection.call_count == 5
-        assert recombination.call_count == 5
-        assert mutation.call_count == 10
-        assert replacement.call_count == 1
+        assert ga.selection.call_count == 5
+        assert ga.recombination.call_count == 5
+        assert ga.mutation.call_count == 10
+        assert ga.replacement.call_count == 1
         assert ga.best() == ga.population[-1]
