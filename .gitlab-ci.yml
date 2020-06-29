@@ -40,4 +40,3 @@ pypi:
     - pipenv run twine upload dist/*
   only:
     - master
-    - devel
