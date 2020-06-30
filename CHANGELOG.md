@@ -5,6 +5,15 @@ This document holds all the changes in the project.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning]
 
+## Unreleased
+- Genotypes now maintain a list of parents, so it is possible to extract all
+the genealogy from a single `Genotype` instance.
+- There were some classes that made impossible to change their behaviour in run
+time. They've been update. Those classes are:
+    - `SelectionSchema`: Now it is possible to change the `replacement`
+    attribute, and seitch from a non replacement schema to a replacement one.
+    
+
 ## 0.7.0 - 2020-06-28
 - The `Genotype` class now has a `phenotype` abstract method that must be
  overrode to obtain the individual. This phenotype is the object to be used as

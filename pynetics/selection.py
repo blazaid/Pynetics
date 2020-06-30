@@ -56,16 +56,7 @@ class SelectionSchema(metaclass=abc.ABCMeta):
             more than once. Defaults to False (i.e. selection without
             replacement).
         """
-        self.__replacement = replacement
-
-    @property
-    def replacement(self):
-        """If selection schema is with or without replacement.
-
-        :return: True if is a selection with replacement or False
-            otherwise.
-        """
-        return self.__replacement
+        self.replacement = replacement
 
     def __call__(
             self,
