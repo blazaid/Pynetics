@@ -271,6 +271,19 @@ class TestPopulation:
         assert population.empty()
         assert len(population) == 0
 
+    def test_change_fitness_function_affects_genotypes(self):
+        population = build_population(size=2)
+
+        old_fitness = population.fitness
+        for genotype in population:
+            assert genotype.fitness_function == old_fitness
+
+        new_fitness = Mock()
+        population.fitness = new_fitness
+        for genotype in population:
+            assert genotype.fitness_function != old_fitness
+            assert genotype.fitness_function == new_fitness
+
     @pytest.mark.parametrize('p1_size', [2, 4, 8])
     @pytest.mark.parametrize('p1_halved', [True, False])
     @pytest.mark.parametrize('p2_size', [2, 4, 8])

@@ -175,3 +175,19 @@ class TestGeneticAlgorithm(EvolutiveAlgorithmTests):
         assert ga.mutation.call_count == 10
         assert ga.replacement.call_count == 1
         assert ga.best() == ga.population[-1]
+
+    def test_change_fitness_function_affects_population(self):
+        ga = self.get_instance(population_size=10, mock_population=True)
+
+        old_fitness = ga.fitness
+        assert ga.population.fitness == old_fitness
+        for genotype in ga.population:
+            assert genotype.fitness_function == old_fitness
+
+        new_fitness = Mock()
+        ga.fitness = new_fitness
+        assert ga.population.fitness != old_fitness
+        assert ga.population.fitness == new_fitness
+        for genotype in ga.population:
+            assert genotype.fitness_function != old_fitness
+            assert genotype.fitness_function == new_fitness

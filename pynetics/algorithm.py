@@ -98,7 +98,6 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         self.population_size = population_size
         self.initializer = initializer
         self.stop_condition = stop_condition
-        self.fitness = fitness
         self.selection = selection
 
         # The recombination is optional, so in case no recombination is
@@ -119,7 +118,23 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         # The population held in this algorithm. This variable will
         # always contain the population corresponding to the current
         # generation.
-        self.population = api.Population(self.population_size, self.fitness)
+        self.population = api.Population(self.population_size, fitness)
+
+    @property
+    def fitness(self) -> api.Fitness:
+        """The fitness used by the genotypes during the algorithm
+
+        :return: A recombination schema.
+        """
+        return self.population.fitness
+
+    @fitness.setter
+    def fitness(self, fitness: api.Fitness):
+        """Establishes the fitness function to evaluate the phenotypes.
+
+        :param fitness: The fitness for this algorithm.
+        """
+        self.population.fitness = fitness
 
     @property
     def offspring_size(self) -> int:
@@ -233,7 +248,7 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
         """The particular implementation of this genetic algorithm."""
         # Create the new empty population to hold the new offspring.
         offspring = api.Population(
-            size=self.offspring_size, fitness=self.fitness
+            size=self.offspring_size, fitness=self.population.fitness
         )
 
         # Fill the offspring with the genotypes following the standard

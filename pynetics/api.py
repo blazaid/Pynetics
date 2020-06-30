@@ -324,6 +324,27 @@ class Population(MutableSequence[Genotype]):
 
         self.is_sorted = True
 
+    @property
+    def fitness(self) -> Fitness:
+        """The fitness used to evaluate the genotypes of the population.
+
+        :return: This population fitness function.
+        """
+        return self.__fitness
+
+    @fitness.setter
+    def fitness(self, fitness: Fitness):
+        """Establishes the fitness function to evaluate the phenotypes.
+
+        When set, all the genotypes ins this population will change
+        their fitness function to the new one.
+
+        :param fitness: The fitness for this algorithm.
+        """
+        self.__fitness = fitness
+        for genotype in self.genotypes:
+            genotype.fitness_function = self.fitness
+
     def __add__(self, other: Population) -> Population:
         """Creates a new population adding the two specified.
 
