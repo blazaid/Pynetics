@@ -188,44 +188,6 @@ class Genotype(metaclass=abc.ABCMeta):
     def __init__(self):
         """Initializes this object."""
         self.fitness_function: Optional[Fitness] = None
-        self.__parents: List[Genotype] = []
-
-    def add_parents(self, *genotypes: Genotype):
-        """Adds one or more parents to this genotype.
-
-        :param genotypes: One or more Genotype instances representing
-            this genotype's parents. If no parents provided, the method
-            returns silently.
-        """
-        for genotype in genotypes:
-            if genotype not in self.__parents:
-                self.__parents.append(genotype)
-
-    def remove_parents(self, *genotypes: Genotype):
-        """Removes one or more parents from this genotype.
-
-        :param genotypes: One or more Genotype instances to remove from
-            this genotype's parents. If any of the parents is not one of
-            the current genotype's parents, the method does nothing with
-            it. Also, if no parents provided, the method returns
-            silently.
-        """
-        for genotype in genotypes:
-            try:
-                self.__parents.remove(genotype)
-            except ValueError:
-                # The genotype is not in the parents list so we do
-                # nothing with it.
-                pass
-
-    @property
-    def parents(self) -> List[Genotype]:
-        """Returns the parents of the current genotype.
-
-        :return: A list with this genotype parents. Modifying this list
-            doest not modify the genotype.
-        """
-        return self.__parents[:]
 
     def fitness(self) -> float:
         """Returns the fitness of this particular genotype.
@@ -323,6 +285,27 @@ class Population(MutableSequence[Genotype]):
         self.max_size = size
 
         self.is_sorted = True
+
+    @property
+    def fitness(self) -> Fitness:
+        """The fitness used to evaluate the genotypes of the population.
+
+        :return: This population fitness function.
+        """
+        return self.__fitness
+
+    @fitness.setter
+    def fitness(self, fitness: Fitness):
+        """Establishes the fitness function to evaluate the phenotypes.
+
+        When set, all the genotypes ins this population will change
+        their fitness function to the new one.
+
+        :param fitness: The fitness for this algorithm.
+        """
+        self.__fitness = fitness
+        for genotype in self.genotypes:
+            genotype.fitness_function = self.fitness
 
     def __add__(self, other: Population) -> Population:
         """Creates a new population adding the two specified.
@@ -505,6 +488,6 @@ Diversity = Callable[[Any], float]
 Fitness = Callable[[Any], float]
 Mutation = Callable[[float, Genotype], Genotype]
 Recombination = Callable[[Genotype], Iterable[Genotype]]
-Replacement = Callable[[Population, Population], Population]
+Replacement = Callable[[Population, Population, Optional[int]], Population]
 Selection = Callable[[Population, int], Tuple[Genotype, ...]]
 StopCondition = Callable[[EvolutiveAlgorithm], bool]

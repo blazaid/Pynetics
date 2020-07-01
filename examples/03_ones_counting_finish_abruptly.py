@@ -35,7 +35,8 @@ from pynetics.replacement import high_elitism
 from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
-TARGET_LEN = 100
+TARGET_LEN = 50
+STOP_ON = 10
 
 
 def fitness(phenotype):
@@ -71,10 +72,13 @@ if __name__ == '__main__':
         recombination_probability=1.0,
         mutation=RandomGene(BINARY),
         mutation_probability=1 / TARGET_LEN,
-        replacement=(high_elitism, 0.7),
-        callbacks=[StopBecauseIAmWorthIt(m=42)]
+        replacement=high_elitism,
+        replacement_ratio=0.7,
+        callbacks=[StopBecauseIAmWorthIt(m=STOP_ON)]
     )
 
     history = ga.run()
     best = history.data['Best genotype'][-1]
-    print(history.generation, best, best.fitness())
+    print(f'Generations: {history.generation}')
+    print(f'- Phenotype:\t{best.phenotype()}')
+    print(f'- Fitness:\t\t{best.fitness()}')

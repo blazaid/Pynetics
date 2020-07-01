@@ -54,13 +54,16 @@ if __name__ == '__main__':
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(3),
+        replacement=high_elitism,
+        replacement_ratio=1.0,
         recombination=random_mask,
         recombination_probability=1.0,
         mutation=RandomGene(BINARY),
         mutation_probability=1 / TARGET_LEN,
-        replacement=(high_elitism, 1.0),
     )
 
     history = ga.run()
     best = history.data['Best genotype'][-1]
-    print(history.generation, best, best.fitness())
+    print(f'Generations: {history.generation}')
+    print(f'- Phenotype:\t{best.phenotype()}')
+    print(f'- Fitness:\t\t{best.fitness()}')

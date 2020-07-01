@@ -24,12 +24,10 @@
 """Replacement algorithms.
 """
 import abc
+import logging
+from typing import Optional
 
 from . import api
-from .exception import (
-    PopulationSizesDoNotMatchAfterReplacement,
-    OffspringSizeBiggerThanPopulationSize,
-)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,18 +42,15 @@ class ReplacementSchema(metaclass=abc.ABCMeta):
     resulting from the combination of the previous two.
     """
 
-    def __init__(self, *, maintain: bool = True):
-        """Initializes this object.
-
-        :param maintain: If the returned population must have the same
-            population size than the original one. Defaults to True.
-        """
-        self.maintain = maintain
+    def __init__(self):
+        """Initializes this object."""
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def __call__(
             self, *,
             population: api.Population,
             offspring: api.Population,
+            max_size: Optional[int] = None,
     ) -> api.Population:
         """Executes the replacement method.
 
@@ -65,33 +60,37 @@ class ReplacementSchema(metaclass=abc.ABCMeta):
 
         :param population: The original population.
         :param offspring: The population to replace the original one.
+        :param max_size: The max size of the new population. If not
+            specified or invalid, the size will be set as the one of the
+            original population.
         :return: A new Population instance.
-        :raise OffspringSizeBiggerThanPopulationSize: If the offspring
-            size is bigger than the population size.
-        :raise PopulationSizesDontMatchAfterReplacement: If the new
-            population size is bigger after the call of the method.
         """
-        if len(offspring) > len(population):
-            raise OffspringSizeBiggerThanPopulationSize(
-                population_size=len(population),
-                offspring_size=len(offspring),
+        # Set the size for the new population
+        if max_size is None:
+            max_size = population.max_size
+        elif not isinstance(max_size, int):
+            self.logger.warning(
+                f'Size for the new population not valid ({max_size}); using '
+                f'the base population size instead'
             )
-
-        new_population = self.do(population=population, offspring=offspring)
-
-        if self.maintain and len(population) != len(new_population):
-            raise PopulationSizesDoNotMatchAfterReplacement(
-                old_size=len(population),
-                new_size=len(new_population),
+            max_size = population.max_size
+        elif max_size < 1:
+            self.logger.warning(
+                f'Size too small for the new population ({max_size}); '
+                f'using the base population size instead'
             )
-        else:
-            return new_population
+            max_size = population.max_size
+
+        return self.do(
+            population=population, offspring=offspring, max_size=max_size
+        )
 
     @abc.abstractmethod
     def do(
             self, *,
             population: api.Population,
             offspring: api.Population,
+            max_size: Optional[int] = None,
     ) -> api.Population:
         """Executes this particular implementation of selection.
 
@@ -101,6 +100,8 @@ class ReplacementSchema(metaclass=abc.ABCMeta):
 
         :param population: The original population.
         :param offspring: The population to replace the original one.
+        :param max_size: The size of the new population. It is
+            guaranteed that the value will be a valid int value.
         :return: A new Population instance.
         """
 
@@ -122,11 +123,14 @@ class HighElitism(ReplacementSchema):
             self, *,
             population: api.Population,
             offspring: api.Population,
+            max_size: Optional[int] = None,
     ) -> api.Population:
         """Executes this replacement.
 
         :param population: The original population.
         :param offspring: The population to replace the original one.
+        :param max_size: The size of the new population. It is
+            guaranteed that the value will be a valid int value.
         :return: A new Population instance.
         """
         # Concat both populations
@@ -137,8 +141,8 @@ class HighElitism(ReplacementSchema):
 
         # Just delete the works ones until population has the expected
         # size and set it as the maximum size of the new population
-        del new_population[:-population.max_size]
-        new_population.max_size = population.max_size
+        del new_population[:-max_size]
+        new_population.max_size = max_size
 
         # Return the newly created population
         return new_population
@@ -161,27 +165,33 @@ class LowElitism(ReplacementSchema):
             self, *,
             population: api.Population,
             offspring: api.Population,
+            max_size: Optional[int] = None,
     ) -> api.Population:
         """Executes this replacement.
 
         :param population: The original population.
         :param offspring: The population to replace the original one.
+        :param max_size: The size of the new population. It is
+            guaranteed that the value will be a valid int value.
         :return: A new Population instance.
         """
         # Create the new population to fill with the genotypes
         new_population = api.Population(
-            size=population.max_size,
-            fitness=population.fitness
+            size=max_size, fitness=population.fitness
         )
 
-        # Fill the best n genotypes of the first population, being n the
-        # max_length of the populations minus the number of genotypes in
-        # the second population
-        population.sort()
-        new_population.extend(population[len(offspring):])
+        # First, we add the best genotypes in the offspring population
+        # that fit in the new population.
+        num_genotypes = min(max_size, len(offspring))
+        offspring.sort()
+        new_population.extend(offspring[-num_genotypes:])
 
-        # Fill with the genotypes of the second population
-        new_population.extend(offspring)
+        # Second, we fill the new population with the best genotypes
+        # from the old population (if needed).
+        num_genotypes = max_size - len(new_population)
+        if num_genotypes > 0:
+            population.sort()
+            new_population.extend(population[-num_genotypes:])
 
         # Return the newly created population
         return new_population

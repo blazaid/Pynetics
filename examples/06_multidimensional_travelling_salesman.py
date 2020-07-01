@@ -103,14 +103,15 @@ if __name__ == '__main__':
     ga = GeneticAlgorithm(
         population_size=10,
         initializer=PermutationInitializer(size=N, alphabet=alphabet),
-        stop_condition=NumSteps(100),
+        stop_condition=NumSteps(200),
         fitness=fitness,
         selection=Tournament(2),
         recombination=pmx,
         recombination_probability=1.0,
         mutation=swap_genes,
         mutation_probability=1 / N,
-        replacement=(low_elitism, 0.9),
+        replacement=low_elitism,
+        replacement_ratio=0.9,
         callbacks=[MyCallback()]
     )
 
