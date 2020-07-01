@@ -21,20 +21,34 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Import core names of pynetics.
+from .. import api
 
-This library provides the means to create genetic algorithms in a simple
-yet fast way. Specifically:
 
-1. A generic and modular algorithm to be composed by the different parts
-that build a whole algorithm.
-2. Simple algorithm implementations with some defaults implemented.
-3. Different generic operators (e.g. crossover or mutation) to work with
-different genotypes (e.g. binary list, real list).
+class NumSteps:
+    """Stop based on the number of iterations.
 
-The fastest way to work with this library is by importing this file
-directly:
+    The condition is met once the number of iterations has reached an
+    specified limit.
+    """
 
->>> import pynetics as pyn
-"""
-__version__ = '0.7.0'
+    def __init__(self, steps: int):
+        """Initializes this object with the number of iterations.
+
+        :param steps: The number of iterations to do before stop.
+        """
+        self.steps = steps
+
+    def __call__(self, genetic_algorithm: api.EvolutiveAlgorithm) -> bool:
+        """Checks if this stop criteria is met.
+
+        It will look at the generation of the genetic algorithm. It's
+        expected that, if its generation is greater or equal than the
+        specified in initialization method, the criteria is met.
+
+        :param genetic_algorithm: The genetic algorithm where this stop
+            condition belongs.
+        :return: True if criteria is met, false otherwise.
+        :raise: NoGenerationInGeneticAlgorithm if the genetic_algorithm
+            argument does not have a "generation" property.
+        """
+        return genetic_algorithm.generation >= self.steps
