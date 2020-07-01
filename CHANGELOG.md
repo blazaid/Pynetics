@@ -5,7 +5,27 @@ This document holds all the changes in the project.
 The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning]
 
+    Added for new features.
+    Changed for changes in existing functionality.
+    Deprecated for soon-to-be removed features.
+    Removed for now removed features.
+    Fixed for any bug fixes.
+    Security in case of vulnerabilities.
+
+[//]: # (Try to maintain each change with this structure:)
+[//]: # (### Added: New features.)
+[//]: # (### Changed: Changes in existing functionalities.)
+[//]: # (### Deprecated: Soon-to-be removed features.)
+[//]: # (### Removed: Removed features.)
+[//]: # (### Fixed: Bug fixes.)
+[//]: # (### Security: Vulnerabilities.)
+
 ## Unreleased
+### Added
+- New stop condition, `never` that, as its name says, is a condition that is
+never met.
+
+### Changed
 - There were some classes that made impossible to change their behaviour in run
 time. They've been update. Those classes are:
     - `SelectionSchema`: Now it is possible to change the `replacement`
@@ -21,6 +41,7 @@ time. They've been update. Those classes are:
         `genotypes` inside it.
     - Don't remember more changes, but from now on, anything detected that may
     be made modifiable in runtime, it'll have its own issue.
+- Slightly modified the library layout structure.
 
 ## 0.7.0 - 2020-06-28
 - The `Genotype` class now has a `phenotype` abstract method that must be
@@ -48,4 +69,3 @@ base on which to work.
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
-

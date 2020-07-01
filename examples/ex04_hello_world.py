@@ -21,60 +21,63 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Same example as `02_ones_counting_with_callbacks.py`, but this time
-the callback will finish the algorithm if there exists n consecutive
-1's.
+"""In this case, we're trying to reach a target sentence. It needs a
+different alphabet, but it is almost the same problem as ones counting.
 """
+import string
+
 from pynetics.algorithm import GeneticAlgorithm
 from pynetics.callback import Callback
-from pynetics.list.alphabet import BINARY
-from pynetics.list.initializer import AlphabetInitializer
+from pynetics.list.initializer import Alphabet, AlphabetInitializer
 from pynetics.list.mutation import RandomGene
-from pynetics.list.recombination import random_mask
+from pynetics.list.recombination import one_point_crossover
 from pynetics.replacement import high_elitism
 from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
-TARGET_LEN = 50
-STOP_ON = 10
+TARGET = 'Hello, World!'
+TARGET_LEN = len(TARGET)
 
 
 def fitness(phenotype):
-    """Calculated as the sum of the 1's by the length of the chromosome.
+    """The fitness will be based on the hamming distance error."""
+    # Derive the phenotype from the genotype
+    sentence = ''.join(str(x) for x in phenotype)
+    # Compute the error of this solution
+    error = len([i for i in filter(
+        lambda x: x[0] != x[1], zip(sentence, TARGET)
+    )])
+    # Return the fitness according to that error
+    return 1 / (1 + error)
 
-    :return: The fitness of the individual.
-    """
-    return sum(phenotype) / len(phenotype)
 
-
-class StopBecauseIAmWorthIt(Callback):
-    """Stops if there are n consecutive 1's in the genotype"""
-
-    def __init__(self, m):
-        self.m = m
-        self.ones = '1' * self.m
+class MyCallback(Callback):
+    def on_step_begins(self, g):
+        print(f'Generation: {g.generation}\t', end='')
 
     def on_step_ends(self, g):
-        for genotype in g.population:
-            if self.ones in ''.join(map(str, genotype)):
-                print(f"Stopping because we found {self.m} consecutive 1's")
-                g.stop()
+        sentence = ''.join(str(x) for x in g.best().phenotype())
+        print(f'{sentence}\tfitness: {g.best().fitness():.2f}')
 
+
+alphabet = Alphabet(
+    genes=string.ascii_letters + string.punctuation + ' '
+)
 
 if __name__ == '__main__':
     ga = GeneticAlgorithm(
-        population_size=4,
-        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=BINARY),
+        population_size=10,
+        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=alphabet),
         stop_condition=FitnessBound(1),
         fitness=fitness,
-        selection=Tournament(3),
-        recombination=random_mask,
+        selection=Tournament(4),
+        recombination=one_point_crossover,
         recombination_probability=1.0,
-        mutation=RandomGene(BINARY),
+        mutation=RandomGene(alphabet),
         mutation_probability=1 / TARGET_LEN,
         replacement=high_elitism,
-        replacement_ratio=0.7,
-        callbacks=[StopBecauseIAmWorthIt(m=STOP_ON)]
+        replacement_ratio=1.0,
+        callbacks=[MyCallback()]
     )
 
     history = ga.run()

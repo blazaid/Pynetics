@@ -21,20 +21,32 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Import core names of pynetics.
+from unittest.mock import Mock
 
-This library provides the means to create genetic algorithms in a simple
-yet fast way. Specifically:
+import pytest
 
-1. A generic and modular algorithm to be composed by the different parts
-that build a whole algorithm.
-2. Simple algorithm implementations with some defaults implemented.
-3. Different generic operators (e.g. crossover or mutation) to work with
-different genotypes (e.g. binary list, real list).
+from pynetics.stop import NumSteps
 
-The fastest way to work with this library is by importing this file
-directly:
 
->>> import pynetics as pyn
-"""
-__version__ = '0.7.0'
+class TestNumSteps:
+    """Test for the `NumSteps` stop condition."""
+
+    @pytest.mark.parametrize('steps', [10])
+    def test_criteria_not_met_when_lower_steps(self, steps):
+        """Not met when generations are lower than expected."""
+        stop_condition = NumSteps(steps=steps)
+
+        genetic_algorithm = Mock()
+        for generation in range(steps):
+            genetic_algorithm.generation = generation
+            assert not stop_condition(genetic_algorithm)
+
+    @pytest.mark.parametrize('steps', [10])
+    def test_criteria_met_when_higher_fitness(self, steps):
+        """Met when generations are greater or equal than expected."""
+        stop_condition = NumSteps(steps=steps)
+
+        genetic_algorithm = Mock()
+        for generation in range(steps + 1, steps + 10):
+            genetic_algorithm.generation = generation
+            assert stop_condition(genetic_algorithm)
