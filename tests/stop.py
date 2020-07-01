@@ -25,7 +25,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from pynetics.stop import FitnessBound
+from pynetics.stop import FitnessBound, never, NumSteps
 
 
 class TestFitnessBound:
@@ -59,3 +59,35 @@ class TestFitnessBound:
 
         stop_condition = FitnessBound(bound=1.0)
         assert stop_condition(genetic_algorithm)
+
+
+class TestNever:
+    """Test for the `never` stop condition."""
+
+    def test_criteria_is_always_false(self):
+        """Condition is never met."""
+        assert not never(Mock())
+
+
+class TestNumSteps:
+    """Test for the `NumSteps` stop condition."""
+
+    @pytest.mark.parametrize('steps', [10])
+    def test_criteria_not_met_when_lower_steps(self, steps):
+        """Not met when generations are lower than expected."""
+        stop_condition = NumSteps(steps=steps)
+
+        genetic_algorithm = Mock()
+        for generation in range(steps):
+            genetic_algorithm.generation = generation
+            assert not stop_condition(genetic_algorithm)
+
+    @pytest.mark.parametrize('steps', [10])
+    def test_criteria_met_when_higher_fitness(self, steps):
+        """Met when generations are greater or equal than expected."""
+        stop_condition = NumSteps(steps=steps)
+
+        genetic_algorithm = Mock()
+        for generation in range(steps + 1, steps + 10):
+            genetic_algorithm.generation = generation
+            assert stop_condition(genetic_algorithm)
