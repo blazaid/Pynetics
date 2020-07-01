@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Semantic Versioning]
 
 ## Unreleased
-- Genotypes now maintain a list of parents, so it is possible to extract all
-the genealogy from a single `Genotype` instance.
 - There were some classes that made impossible to change their behaviour in run
 time. They've been update. Those classes are:
     - `SelectionSchema`: Now it is possible to change the `replacement`
@@ -16,7 +14,13 @@ time. They've been update. Those classes are:
     - `GeneticAlgorithm`: Here there are a number of changes:
         - Although`recombination` could be dynamically modified, the selection
         size didn't change with it, so it may lead to an error. Now, the
-        selection size changes according to the new recombination parameter. 
+        selection size changes according to the new recombination parameter.
+        - The `population_size` has also some lateral effects that have to do
+        with the `offspring_size`. It has also been changed.
+        - Also the `fitness`, which affects to the `population` and the
+        `genotypes` inside it.
+    - Don't remember more changes, but from now on, anything detected that may
+    be made modifiable in runtime, it'll have its own issue.
 
 ## 0.7.0 - 2020-06-28
 - The `Genotype` class now has a `phenotype` abstract method that must be

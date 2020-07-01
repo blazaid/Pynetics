@@ -261,10 +261,6 @@ class GeneticAlgorithm(api.EvolutiveAlgorithm):
             # Recombine the selected genotypes to get the new progeny
             if take_chances(self.recombination_probability):
                 progeny = self.recombination(*parents)
-                # These are new genotypes, so we're identifying their
-                # parents to keep the evolutionary tree
-                for genotype in progeny:
-                    genotype.add_parents(*parents)
             else:
                 progeny = parents
 
