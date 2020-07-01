@@ -114,8 +114,11 @@ the generation it appeared and its fitness.
 
 .. code-block:: python
 
+    history = ga.run()
     best = history.data['Best genotype'][-1]
-    print(history.generation, best, best.fitness())
+    print(f'Generations: {history.generation}')
+    print(f'- Phenotype:\t{best.phenotype()}')
+    print(f'- Fitness:\t\t{best.fitness()}')
 
 And that's all! I hope you were under the impression of how to work with the
 library.

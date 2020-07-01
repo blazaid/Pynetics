@@ -52,12 +52,12 @@ def fitness(phenotype):
 
 
 class MyCallback(Callback):
+    def on_step_begins(self, g):
+        print(f'Generation: {g.generation}\t', end='')
+
     def on_step_ends(self, g):
-        print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
-            g.generation,
-            g.best().fitness(),
-            ''.join(g.best()),
-        ))
+        sentence = ''.join(str(x) for x in g.best().phenotype())
+        print(f'{sentence}\tfitness: {g.best().fitness():.2f}')
 
 
 alphabet = Alphabet(
@@ -75,7 +75,8 @@ if __name__ == '__main__':
         recombination_probability=1.0,
         mutation=RandomGene(alphabet),
         mutation_probability=1 / TARGET_LEN,
-        replacement=(high_elitism, 1.0),
+        replacement=high_elitism,
+        replacement_ratio=1.0,
         callbacks=[MyCallback()]
     )
 

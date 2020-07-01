@@ -150,66 +150,6 @@ class GenotypeTests(GenericTest, metaclass=abc.ABCMeta):
 
         genotype.fitness_function.assert_called_once()
 
-    def test_genotype_is_created_without_parents(self):
-        """A genotype is created without parents."""
-        assert not self.get_instance().parents
-
-    @pytest.mark.parametrize('number', [1, 2, 4, 6, 8])
-    def test_adding_parents_is_reflected_in_the_genotype(self, number):
-        parents = [Mock() for _ in range(number)]
-
-        genotype = self.get_instance()
-        genotype.add_parents(*parents)
-
-        assert genotype.parents == parents
-
-    def test_removing_parents_actually_removes_them(self):
-        genotype = self.get_instance()
-
-        p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 = [Mock() for _ in range(10)]
-        genotype.add_parents(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-        assert genotype.parents == [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
-
-        genotype.remove_parents(Mock())
-        assert genotype.parents == [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
-
-        genotype.remove_parents(p1, p2)
-        assert genotype.parents == [p3, p4, p5, p6, p7, p8, p9, p10]
-
-        genotype.remove_parents(p9, p10)
-        assert genotype.parents == [p3, p4, p5, p6, p7, p8]
-
-        genotype.remove_parents(p5, p6)
-        assert genotype.parents == [p3, p4, p7, p8]
-
-        genotype.remove_parents(p3)
-        assert genotype.parents == [p4, p7, p8]
-
-        genotype.remove_parents(p7)
-        assert genotype.parents == [p4, p8]
-
-        genotype.remove_parents(p8)
-        assert genotype.parents == [p4]
-
-        genotype.remove_parents(p4)
-        assert genotype.parents == []
-
-    def test_parents_cannot_be_modified(self):
-        """Parents are not modified when modified outside."""
-        genotype = self.get_instance()
-
-        current_parents = genotype.parents
-        assert current_parents == genotype.parents
-        assert current_parents is not genotype.parents
-
-        genotype.add_parents(Mock(), Mock(), Mock())
-        current_parents = genotype.parents
-        assert current_parents == genotype.parents
-        assert current_parents is not genotype.parents
-
-        current_parents.append(Mock())
-        assert current_parents != genotype.parents
-
     @abc.abstractmethod
     def test_check_equality_between_two_genotypes(self):
         """Two instances with the same content are equal."""
@@ -270,6 +210,19 @@ class TestPopulation:
             population.pop()
         assert population.empty()
         assert len(population) == 0
+
+    def test_change_fitness_function_affects_genotypes(self):
+        population = build_population(size=2)
+
+        old_fitness = population.fitness
+        for genotype in population:
+            assert genotype.fitness_function == old_fitness
+
+        new_fitness = Mock()
+        population.fitness = new_fitness
+        for genotype in population:
+            assert genotype.fitness_function != old_fitness
+            assert genotype.fitness_function == new_fitness
 
     @pytest.mark.parametrize('p1_size', [2, 4, 8])
     @pytest.mark.parametrize('p1_halved', [True, False])

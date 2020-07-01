@@ -85,18 +85,6 @@ default operators.
 .. code-block:: python
 
     ga = GeneticAlgorithm(
-        population_size=10,
-        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=alphabet),
-        stop_condition=FitnessBound(1),
-        fitness=fitness,
-        selection=Tournament(4),
-        recombination=(one_point_crossover, 1.0),
-        mutation=(RandomGene(alphabet), 1 / TARGET_LEN),
-        replacement=(high_elitism, 1.0),
-        callbacks=[MyCallback()]
-    )
-
-    ga = GeneticAlgorithm(
         # ... Stuff ...
         initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=alphabet),
         # ... More stuff ...

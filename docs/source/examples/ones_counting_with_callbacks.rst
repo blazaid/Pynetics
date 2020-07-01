@@ -27,23 +27,18 @@ the :code:`Callback` helper class, redefining the four methods:
 
 .. code-block:: python
 
-    class MyCallback(Callback):
-        def on_algorithm_begins(self, g):
-            print('Start algorithm')
+ class MyCallback(Callback):
+    def on_algorithm_begins(self, g):
+        print('Start algorithm')
 
-        def on_step_begins(self, g):
-            print('Starting step ... ', end='')
+    def on_step_begins(self, g):
+        print(f'Generation: {g.generation}\t', end='')
 
-        def on_step_ends(self, g):
-            print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
-                g.generation,
-                g.best().fitness(),
-                g.best(),
-            ))
+    def on_step_ends(self, g):
+        print(f'{g.best().phenotype()}\tfitness: {g.best().fitness():.2f}')
 
-        def on_algorithm_ends(self, g):
-            print('End algorithm')
-
+    def on_algorithm_ends(self, g):
+        print('End algorithm')
 
 Algorithm configuration
 -----------------------

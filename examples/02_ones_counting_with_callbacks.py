@@ -50,14 +50,10 @@ class MyCallback(Callback):
         print('Start algorithm')
 
     def on_step_begins(self, g):
-        print('Starting step ... ', end='')
+        print(f'Generation: {g.generation}\t', end='')
 
     def on_step_ends(self, g):
-        print('generation: {}\tfitness: {:.2f}\tIndividual: {}'.format(
-            g.generation,
-            g.best().fitness(),
-            g.best(),
-        ))
+        print(f'{g.best().phenotype()}\tfitness: {g.best().fitness():.2f}')
 
     def on_algorithm_ends(self, g):
         print('End algorithm')
@@ -70,11 +66,12 @@ if __name__ == '__main__':
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(3),
+        replacement=high_elitism,
+        replacement_ratio=1.0,
         recombination=random_mask,
         recombination_probability=1.0,
         mutation=RandomGene(BINARY),
         mutation_probability=1 / TARGET_LEN,
-        replacement=(high_elitism, 1.0),
         callbacks=[MyCallback()],
     )
     ga.run()

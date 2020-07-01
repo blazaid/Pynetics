@@ -23,14 +23,9 @@
 # ======================================================================
 """TODO TDB..."""
 import abc
-from unittest.mock import Mock
 
 import pytest
 
-from pynetics.exception import (
-    OffspringSizeBiggerThanPopulationSize,
-    PopulationSizesDoNotMatchAfterReplacement,
-)
 from pynetics.replacement import LowElitism, HighElitism
 from tests.test_api import GenericTest
 from tests.util import build_population
@@ -41,6 +36,44 @@ from tests.util import build_population
 # ~~~~~~~~~~~~~
 class ReplacementSchemaTests(GenericTest, metaclass=abc.ABCMeta):
     """General tests for the replacement schemas common behavior."""
+
+    @pytest.mark.parametrize('pop_size, off_size', [(10, 5), (5, 10)])
+    @pytest.mark.parametrize('max_size', [None, 0, -1, '2', '10'])
+    def test_invalid_new_max_size_treated_correctly(
+            self, pop_size, off_size, max_size
+    ):
+        population = build_population(size=pop_size)
+        offspring = build_population(size=off_size)
+
+        replacement = self.get_instance()
+        new_population = replacement(
+            population=population, offspring=offspring, max_size=max_size
+        )
+
+        assert new_population.max_size == population.max_size
+
+    @pytest.mark.parametrize('pop_size, off_size, max_size, exp_size', [
+        (10, 5, 2, 2), (5, 10, 2, 2),
+        (10, 5, 5, 5), (5, 10, 5, 5),
+        (10, 5, 9, 9), (5, 10, 9, 9),
+        (10, 5, 10, 10), (5, 10, 10, 10),
+        (10, 5, 11, 11), (5, 10, 11, 11),
+        (10, 5, 15, 15), (5, 10, 15, 15),
+        (10, 5, 20, 15), (5, 10, 20, 15),
+    ])
+    def test_different_sizes_for_the_new_population(
+            self, pop_size, off_size, max_size, exp_size
+    ):
+        population = build_population(size=pop_size)
+        offspring = build_population(size=off_size)
+
+        replacement = self.get_instance()
+        new_population = replacement(
+            population=population, offspring=offspring, max_size=max_size
+        )
+
+        assert new_population.max_size == max_size
+        assert len(new_population) == exp_size
 
     @pytest.mark.parametrize('size', [2, 4, 8, 16])
     def test_offspring_size_smaller_than_population_size(self, size):
@@ -61,17 +94,6 @@ class ReplacementSchemaTests(GenericTest, metaclass=abc.ABCMeta):
         offspring = build_population(size=size)
         replacement(population=population, offspring=offspring)
 
-    @pytest.mark.parametrize('size', [2, 4, 8, 16])
-    def test_offspring_size_bigger_than_population_size(self, size):
-        """Offspring size cannot be bigger than population size."""
-        replacement = self.get_instance()
-
-        population = build_population(size=size)
-        for size in range(size + 1, size + 10):
-            offspring = build_population(size=size)
-            with pytest.raises(OffspringSizeBiggerThanPopulationSize):
-                replacement(population=population, offspring=offspring)
-
     @pytest.mark.parametrize('population_size', [2, 4, 8, 16])
     def test_population_size_cannot_vary(self, population_size):
         """Everything works fine if replacement is set."""
@@ -81,20 +103,6 @@ class ReplacementSchemaTests(GenericTest, metaclass=abc.ABCMeta):
             population = build_population(size=population_size)
             offspring = build_population(size=offspring_size)
 
-            replacement(population=population, offspring=offspring)
-
-    @pytest.mark.parametrize('old_size', [2, 4, ])
-    @pytest.mark.parametrize('new_size', [3, 5, ])
-    def test_error_maintain_population_size(self, old_size, new_size):
-        """Error if old and new population sizes do not match."""
-        population = build_population(size=old_size)
-        offspring = build_population(size=old_size)
-        new_population = build_population(size=new_size)
-
-        replacement = self.get_instance(maintain=True)
-        replacement.do = Mock(side_effect=lambda **kwargs: new_population)
-
-        with pytest.raises(PopulationSizesDoNotMatchAfterReplacement):
             replacement(population=population, offspring=offspring)
 
 

@@ -99,43 +99,6 @@ class RecombinationError(PyneticsError):
     pass
 
 
-# ~~~~~~~~~~~~~~~~~~
-# Replacement errors
-# ~~~~~~~~~~~~~~~~~~
-class ReplacementError(PyneticsError):
-    """Errors related to replacement issues."""
-    pass
-
-
-class OffspringSizeBiggerThanPopulationSize(ReplacementError):
-    """The offspring size cannot be bigger than the population size."""
-
-    def __init__(self, *, population_size, offspring_size):
-        """Initializes this object.
-
-        :param population_size: The population size.
-        :param offspring_size: The offspring size.
-        """
-        msg = f'Offspring size {offspring_size} is bigger than population ' \
-              f'size ({population_size})'
-        super().__init__(msg)
-
-
-class PopulationSizesDoNotMatchAfterReplacement(ReplacementError):
-    """Population sizes dont match after the replacement operation."""
-
-    def __init__(self, *, old_size, new_size):
-        """Initializes this object.
-
-        :param old_size: The size of the population before the
-            replacement operation.
-        :param new_size: The size of the population after the
-            replacement operation.
-        """
-        msg = f"Sizes don't match after replacement ({old_size} != {new_size})"
-        super().__init__(msg)
-
-
 # ~~~~~~~~~~~~~~~~
 # Selection errors
 # ~~~~~~~~~~~~~~~~
