@@ -21,20 +21,15 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Import core names of pynetics.
+"""Tests for all the stop criteria."""
+from unittest.mock import Mock
 
-This library provides the means to create genetic algorithms in a simple
-yet fast way. Specifically:
+from pynetics.stop import never
 
-1. A generic and modular algorithm to be composed by the different parts
-that build a whole algorithm.
-2. Simple algorithm implementations with some defaults implemented.
-3. Different generic operators (e.g. crossover or mutation) to work with
-different genotypes (e.g. binary list, real list).
 
-The fastest way to work with this library is by importing this file
-directly:
+class TestNever:
+    """Test for the `never` stop condition."""
 
->>> import pynetics as pyn
-"""
-__version__ = '0.7.0'
+    def test_criteria_is_always_false(self):
+        """Condition is never met."""
+        assert not never(Mock())

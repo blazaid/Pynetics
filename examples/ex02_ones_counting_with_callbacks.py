@@ -21,64 +21,57 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""In this case, we're trying to reach a target sentence. It needs a
-different alphabet, but it is almost the same problem as ones counting.
+"""Same example as `ex01_ones_counting.py`, but this time we add a
+callback to show how it works.
 """
-import string
-
 from pynetics.algorithm import GeneticAlgorithm
 from pynetics.callback import Callback
-from pynetics.list.initializer import Alphabet, AlphabetInitializer
+from pynetics.list.alphabet import BINARY
+from pynetics.list.initializer import AlphabetInitializer
 from pynetics.list.mutation import RandomGene
-from pynetics.list.recombination import one_point_crossover
+from pynetics.list.recombination import random_mask
 from pynetics.replacement import high_elitism
 from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
-TARGET = 'Hello, World!'
-TARGET_LEN = len(TARGET)
+TARGET_LEN = 50
 
 
 def fitness(phenotype):
-    """The fitness will be based on the hamming distance error."""
-    # Derive the phenotype from the genotype
-    sentence = ''.join(str(x) for x in phenotype)
-    # Compute the error of this solution
-    error = len([i for i in filter(
-        lambda x: x[0] != x[1], zip(sentence, TARGET)
-    )])
-    # Return the fitness according to that error
-    return 1 / (1 + error)
+    """Calculated as the sum of the 1's by the length of the chromosome.
+
+    :return: The fitness of the individual.
+    """
+    return sum(phenotype) / len(phenotype)
 
 
 class MyCallback(Callback):
+    def on_algorithm_begins(self, g):
+        print('Start algorithm')
+
     def on_step_begins(self, g):
         print(f'Generation: {g.generation}\t', end='')
 
     def on_step_ends(self, g):
-        sentence = ''.join(str(x) for x in g.best().phenotype())
-        print(f'{sentence}\tfitness: {g.best().fitness():.2f}')
+        print(f'{g.best().phenotype()}\tfitness: {g.best().fitness():.2f}')
 
+    def on_algorithm_ends(self, g):
+        print('End algorithm')
 
-alphabet = Alphabet(
-    genes=string.ascii_letters + string.punctuation + ' '
-)
 
 if __name__ == '__main__':
     ga = GeneticAlgorithm(
-        population_size=10,
-        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=alphabet),
+        population_size=4,
+        initializer=AlphabetInitializer(size=TARGET_LEN, alphabet=BINARY),
         stop_condition=FitnessBound(1),
         fitness=fitness,
-        selection=Tournament(4),
-        recombination=one_point_crossover,
-        recombination_probability=1.0,
-        mutation=RandomGene(alphabet),
-        mutation_probability=1 / TARGET_LEN,
+        selection=Tournament(3),
         replacement=high_elitism,
         replacement_ratio=1.0,
-        callbacks=[MyCallback()]
+        recombination=random_mask,
+        recombination_probability=1.0,
+        mutation=RandomGene(BINARY),
+        mutation_probability=1 / TARGET_LEN,
+        callbacks=[MyCallback()],
     )
-
-    history = ga.run()
-    print(history)
+    ga.run()

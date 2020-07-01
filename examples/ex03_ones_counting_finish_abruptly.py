@@ -21,8 +21,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Same example as `01_ones_counting.py`, but this time we add a
-callback to show how it works.
+"""Same example as `ex02_ones_counting_with_callbacks.py`, but this time
+the callback will finish the algorithm if there exists n consecutive
+1's.
 """
 from pynetics.algorithm import GeneticAlgorithm
 from pynetics.callback import Callback
@@ -35,6 +36,7 @@ from pynetics.selection import Tournament
 from pynetics.stop import FitnessBound
 
 TARGET_LEN = 50
+STOP_ON = 10
 
 
 def fitness(phenotype):
@@ -45,18 +47,18 @@ def fitness(phenotype):
     return sum(phenotype) / len(phenotype)
 
 
-class MyCallback(Callback):
-    def on_algorithm_begins(self, g):
-        print('Start algorithm')
+class StopBecauseIAmWorthIt(Callback):
+    """Stops if there are n consecutive 1's in the genotype"""
 
-    def on_step_begins(self, g):
-        print(f'Generation: {g.generation}\t', end='')
+    def __init__(self, m):
+        self.m = m
+        self.ones = '1' * self.m
 
     def on_step_ends(self, g):
-        print(f'{g.best().phenotype()}\tfitness: {g.best().fitness():.2f}')
-
-    def on_algorithm_ends(self, g):
-        print('End algorithm')
+        for genotype in g.population:
+            if self.ones in ''.join(map(str, genotype)):
+                print(f"Stopping because we found {self.m} consecutive 1's")
+                g.stop()
 
 
 if __name__ == '__main__':
@@ -66,12 +68,17 @@ if __name__ == '__main__':
         stop_condition=FitnessBound(1),
         fitness=fitness,
         selection=Tournament(3),
-        replacement=high_elitism,
-        replacement_ratio=1.0,
         recombination=random_mask,
         recombination_probability=1.0,
         mutation=RandomGene(BINARY),
         mutation_probability=1 / TARGET_LEN,
-        callbacks=[MyCallback()],
+        replacement=high_elitism,
+        replacement_ratio=0.7,
+        callbacks=[StopBecauseIAmWorthIt(m=STOP_ON)]
     )
-    ga.run()
+
+    history = ga.run()
+    best = history.data['Best genotype'][-1]
+    print(f'Generations: {history.generation}')
+    print(f'- Phenotype:\t{best.phenotype()}')
+    print(f'- Fitness:\t\t{best.fitness()}')

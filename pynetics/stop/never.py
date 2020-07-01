@@ -21,20 +21,21 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Import core names of pynetics.
+from .. import api
 
-This library provides the means to create genetic algorithms in a simple
-yet fast way. Specifically:
 
-1. A generic and modular algorithm to be composed by the different parts
-that build a whole algorithm.
-2. Simple algorithm implementations with some defaults implemented.
-3. Different generic operators (e.g. crossover or mutation) to work with
-different genotypes (e.g. binary list, real list).
+def never(genetic_algorithm: api.EvolutiveAlgorithm) -> bool:
+    """Stop condition that, ironically, never stops.
 
-The fastest way to work with this library is by importing this file
-directly:
+    It doesn't care about the argument, its state, its parameters,
+    properties, ... Nothing. It just doesn't considers it is necessary
+    to stop because it isn't. And you'll never be able to change it, no
+    matter how much effort. Unless you're a developer, of course; if so,
+    then you're closest thing to a god that will ever exist, because you
+    bend reality to your will. Nice thing.
 
->>> import pynetics as pyn
-"""
-__version__ = '0.7.0'
+    :param genetic_algorithm: The genetic algorithm where this stop
+        condition belongs.
+    :return: True if criteria is met, false otherwise.
+    """
+    return False

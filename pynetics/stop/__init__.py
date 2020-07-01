@@ -21,20 +21,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Import core names of pynetics.
-
-This library provides the means to create genetic algorithms in a simple
-yet fast way. Specifically:
-
-1. A generic and modular algorithm to be composed by the different parts
-that build a whole algorithm.
-2. Simple algorithm implementations with some defaults implemented.
-3. Different generic operators (e.g. crossover or mutation) to work with
-different genotypes (e.g. binary list, real list).
-
-The fastest way to work with this library is by importing this file
-directly:
-
->>> import pynetics as pyn
+"""Different implementations of stop conditions for algorithms.
 """
-__version__ = '0.7.0'
+from .fitness_bound import FitnessBound
+from .never import never
+from .num_steps import NumSteps
