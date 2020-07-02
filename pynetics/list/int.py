@@ -21,7 +21,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""TODO TBD...
+"""Operators for specific int representation of list-based genotypes.
 """
 import copy
 import random
@@ -29,6 +29,7 @@ from typing import Tuple, Optional
 
 from .genotype import ListGenotype
 from .initializer import IntervalInitializer
+from .mutation import PerGeneMutation
 from ..exception import BoundsCannotBeTheSame
 from ..util import take_chances
 
@@ -52,7 +53,7 @@ class IntegerIntervalInitializer(IntervalInitializer):
 # ~~~~~~~~~~~~~~~~
 # Mutation schemas
 # ~~~~~~~~~~~~~~~~
-class Creep:
+class Creep(PerGeneMutation):
     """Mutates the genotype by adding a small value to some genes.
 
     This value may be positive or negative, and the resulting value may
@@ -96,37 +97,19 @@ class Creep:
         else:
             self.lower, self.upper = min(lower, upper), max(lower, upper)
 
-    def __call__(self, p: float, genotype: ListGenotype) -> ListGenotype:
-        """Performs the mutation schema.
+    def do(self, genotype: ListGenotype, index: int):
+        """Performs the specific mutation
 
-        :param p: The probability of mutation.
-        :param genotype: The genotype to be mutated.
-        :return: A new mutated genotype. If no mutation was performed,
-            the same genotype instance is returned.
+        :param genotype: the genotype to mutate.
+        :param index: which gene is affected.
         """
-        # TODO Common behaviour can be extracted (something like "per
-        #  gene mutation" or something like that).
-        clone = None
-        for i, gene in enumerate(genotype):
-            # Check if a mutation occurs over this gene
-            if take_chances(probability=p):
-                # Check if this is the first mutation and clone the
-                # original genotype if it is
-                if clone is None:
-                    clone = copy.deepcopy(genotype)
-                # Compute the new gene value taking into account the
-                # boundaries (if any)
-                new_gene = gene + self.compute_amount()
-                if self.lower is not None:
-                    new_gene = max(new_gene, self.lower)
-                if self.upper is not None:
-                    new_gene = min(new_gene, self.upper)
-                # Update the gene value
-                clone[i] = new_gene
-
-        # Return either the mutated genotype or the original one if no
-        # mutation was performed
-        return clone or genotype
+        new_gene = genotype[index] + self.compute_amount()
+        if self.lower is not None:
+            new_gene = max(new_gene, self.lower)
+        if self.upper is not None:
+            new_gene = min(new_gene, self.upper)
+        # Update the gene value
+        genotype[index] = new_gene
 
     def compute_amount(self) -> int:
         """Compute the amount to add or subtract base on the arguments.
