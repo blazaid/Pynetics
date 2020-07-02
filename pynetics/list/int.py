@@ -25,16 +25,17 @@
 """
 import copy
 import random
-from typing import Tuple
+from typing import Tuple, Optional
 
 from .genotype import ListGenotype
 from .initializer import IntervalInitializer
+from ..exception import BoundsCannotBeTheSame
+from ..util import take_chances
+
+
 # ~~~~~~~~~~~~
 # Initializers
 # ~~~~~~~~~~~~
-from ..exception import BoundsCannotBeTheSame
-
-
 class IntegerIntervalInitializer(IntervalInitializer):
     """Initializer for int based ListGenotype instances."""
 
@@ -46,6 +47,102 @@ class IntegerIntervalInitializer(IntervalInitializer):
         :return: A value for the specified interval at initialization.
         """
         return random.randint(self.lower, self.upper)
+
+
+# ~~~~~~~~~~~~~~~~
+# Mutation schemas
+# ~~~~~~~~~~~~~~~~
+class Creep:
+    """Mutates the genotype by adding a small value to some genes.
+
+    This value may be positive or negative, and the resulting value may
+    belong to a closer or upper interval.
+    """
+
+    def __init__(
+            self, *,
+            amount: int,
+            fixed: Optional[bool] = True,
+            lower: Optional[int] = None,
+            upper: Optional[int] = None,
+    ):
+        """Initializes this object.
+
+        :param amount: How much to add (or subtract) from the mutated
+            gene. Must be greater or lower than zero.  As it will be
+            added or subtracted, it'll be stored as a positive value.
+        :param fixed: If the amount should be added or subtracted (True)
+            or if the value should belong to the interval [1, amount)
+            (False). If false, the value will be selected uniformly
+            from the interval.
+        :param lower: The lower bound for the genes in the genotype. If
+            its not specified, the genes will not have a lower bound. If
+            both the lower and upper limits are set
+        :param upper: The upper bound for the genes in the genotype.
+        :raise ValueError: If the amount to add to the mutated genes is
+            zero.
+        :raise BoundsCannotBeTheSame: If the two bounds have the same
+            value.
+        """
+        if amount == 0:
+            raise ValueError('The amount to add (or subtract) cannot be zero')
+        if lower == upper and lower is not None:
+            raise BoundsCannotBeTheSame(lower)
+
+        self.amount = abs(amount)
+        self.fixed = fixed
+        if lower is None or upper is None:
+            self.lower, self.upper = lower, upper
+        else:
+            self.lower, self.upper = min(lower, upper), max(lower, upper)
+
+    def __call__(self, p: float, genotype: ListGenotype) -> ListGenotype:
+        """Performs the mutation schema.
+
+        :param p: The probability of mutation.
+        :param genotype: The genotype to be mutated.
+        :return: A new mutated genotype. If no mutation was performed,
+            the same genotype instance is returned.
+        """
+        # TODO Common behaviour can be extracted (something like "per
+        #  gene mutation" or something like that).
+        clone = None
+        for i, gene in enumerate(genotype):
+            # Check if a mutation occurs over this gene
+            if take_chances(probability=p):
+                # Check if this is the first mutation and clone the
+                # original genotype if it is
+                if clone is None:
+                    clone = copy.deepcopy(genotype)
+                # Compute the new gene value taking into account the
+                # boundaries (if any)
+                new_gene = gene + self.compute_amount()
+                if self.lower is not None:
+                    new_gene = max(new_gene, self.lower)
+                if self.upper is not None:
+                    new_gene = min(new_gene, self.upper)
+                # Update the gene value
+                clone[i] = new_gene
+
+        # Return either the mutated genotype or the original one if no
+        # mutation was performed
+        return clone or genotype
+
+    def compute_amount(self) -> int:
+        """Compute the amount to add or subtract base on the arguments.
+
+        :return: An integer value to add to the gene.
+        """
+        # Compute the amount depending on if it's variable or fixed.
+        if self.fixed:
+            amount = self.amount
+        else:
+            amount = random.randint(1, self.amount)
+        # Then, randomize if we have to add or substract it
+        if take_chances(probability=0.5):
+            return amount
+        else:
+            return -amount
 
 
 # ~~~~~~~~~~~~~~~~~~~~~
@@ -73,7 +170,7 @@ class RangeCrossover:
             switched.
         :param upper: The upper bound for the genes in the genotype.
         :raise BoundsCannotBeTheSame: If the two bounds have the same
-        value.
+            value.
         """
         if lower == upper:
             raise BoundsCannotBeTheSame(lower)

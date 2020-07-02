@@ -21,14 +21,14 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Tests for the integer list implementations."""
+"""Tests for the integer list genotype representation operators."""
 from unittest.mock import patch
 
 import pytest
 
 from pynetics.exception import BoundsCannotBeTheSame
 from pynetics.list.genotype import ListGenotype
-from pynetics.list.int import IntegerIntervalInitializer, RangeCrossover
+from pynetics.list.int import IntegerIntervalInitializer, RangeCrossover, Creep
 from tests.list.test_initializer import IntervalInitializerTests
 from tests.util import random_sequence
 
@@ -54,6 +54,78 @@ class TestIntegerIntervalInitializer(IntervalInitializerTests):
 
         for gene in genotype:
             assert isinstance(gene, int)
+
+
+class TestCreep:
+    """Tests for the creep mutation schema."""
+
+    def test_amount_of_zero_raises_error(self):
+        with pytest.raises(ValueError):
+            Creep(amount=0)
+
+    @pytest.mark.parametrize('amount, lower, upper', [(1, 0, 0), (1, 1, 1)])
+    def test_bounds_cannot_be_the_same(self, amount, lower, upper):
+        with pytest.raises(BoundsCannotBeTheSame):
+            Creep(amount=amount, lower=lower, upper=upper)
+
+    @pytest.mark.parametrize('amount, lower, upper, exp_lower, exp_upper', [
+        (1, None, None, None, None),
+        (1, None, 10, None, 10), (1, -10, None, -10, None),
+        (1, -10, 10, -10, 10), (1, 10, -10, -10, 10),
+        (1, -10, -5, -10, -5), (1, -5, -10, -10, -5),
+        (1, 5, 10, 5, 10), (1, 10, 5, 5, 10),
+    ])
+    def test_boundaries_are_managed_correctly(
+            self, amount, lower, upper, exp_lower, exp_upper
+    ):
+        mutation = Creep(amount=amount, lower=lower, upper=upper)
+        assert mutation.lower == exp_lower
+        assert mutation.upper == exp_upper
+
+    @pytest.mark.parametrize('amount, exp_amount', [(1, 1), (-1, 1)])
+    def test_amount_is_stored_as_a_positive_number(self, amount, exp_amount):
+        mutation = Creep(amount=amount)
+        assert mutation.amount == exp_amount
+
+    @pytest.mark.parametrize(
+        'amount, fixed, lo, hi, chances, ints, p, genes, expected', [
+            (1, True, 0, 10, [0, 0], [1], 1, [5], [6]),
+            (1, True, 0, 10, [0, 1], [1], 1, [5], [4]),
+            (1, True, 0, 10, [0, 0], [2], 1, [5], [6]),
+            (1, True, 0, 10, [0, 1], [2], 1, [5], [4]),
+            (2, True, 0, 10, [0, 0], [1], 1, [5], [7]),
+            (2, True, 0, 10, [0, 1], [1], 1, [5], [3]),
+            (10, True, 0, 10, [0, 0], [1], 1, [5], [10]),
+            (10, True, 0, 10, [0, 1], [1], 1, [5], [0]),
+            (1, False, 0, 10, [0, 0], [1], 1, [5], [6]),
+            (1, False, 0, 10, [0, 1], [1], 1, [5], [4]),
+            (1, False, 0, 10, [0, 0], [2], 1, [5], [7]),
+            (1, False, 0, 10, [0, 1], [2], 1, [5], [3]),
+            (1, False, 0, 10, [0, 0], [10], 1, [5], [10]),
+            (1, False, 0, 10, [0, 1], [10], 1, [5], [0]),
+            (10, True, None, 10, [0, 0], [1], 1, [5], [10]),
+            (10, True, 10, None, [0, 0], [1], 1, [5], [15]),
+            (10, True, None, 10, [0, 1], [1], 1, [5], [-5]),
+            (10, True, 0, None, [0, 1], [1], 1, [5], [0]),
+            (10, False, None, 10, [0, 0], [10], 1, [5], [10]),
+            (10, False, 10, None, [0, 0], [10], 1, [5], [15]),
+            (10, False, None, 10, [0, 1], [10], 1, [5], [-5]),
+            (10, False, 0, None, [0, 1], [10], 1, [5], [0]),
+        ]
+    )
+    def test_mutate_genotypes(
+            self, amount, fixed, lo, hi, chances, ints, p, genes, expected
+    ):
+        mutation = Creep(amount=amount, fixed=fixed, lower=lo, upper=hi)
+
+        take_chances = random_sequence(chances)
+        randint = random_sequence(ints)
+
+        with patch('random.random', side_effect=lambda: next(take_chances)):
+            with patch('random.randint', side_effect=lambda *_: next(randint)):
+                mutated = mutation(p, ListGenotype(genes=genes))
+
+        assert mutated == ListGenotype(genes=expected)
 
 
 class TestRangeCrossover:

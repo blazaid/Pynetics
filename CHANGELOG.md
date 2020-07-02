@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Added
 - New stop condition, `never` that, as its name says, is a condition that is
 never met.
+- New mutation schema, `creep`, addressed to integer representations.
 
 ### Changed
 - There were some classes that made impossible to change their behaviour in run
