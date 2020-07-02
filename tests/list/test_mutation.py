@@ -27,7 +27,7 @@ from unittest import mock
 import pytest
 
 from pynetics.list.alphabet import GENETIC_CODE
-from pynetics.list.mutation import RandomGene, swap_genes
+from pynetics.list.mutation import RandomGene, SwapGenes
 from tests.list.util import execute_mutation_test
 from tests.util import random_sequence
 
@@ -45,15 +45,14 @@ class TestRandomGene:
 
 
 class TestSwapGenes:
-    @pytest.mark.parametrize('probability, genes, expected, rand, choice', [
-        (0.5, 'AAAAAAAAAA', 'AAAAAAAAAA', [0.4, 0.6], [5, 5, 4, 3]),
-        (0.5, 'ACACACACAC', 'CCAACAACAC', [0.4, 0.6], [5, 5, 4, 3]),
-        (0.5, 'ACTGACTGAC', 'CCAAGATGTC', [0.4, 0.6], [5, 5, 4, 3]),
+    @pytest.mark.parametrize('p, genes, expected, random, randint', [
+        (0.5, 'ACTG', 'AGTC', [0.6, 0.4, 0.6, 0.6], [3]),
+        (0.5, 'ACTG', 'ATCG', [0.6, 0.4, 0.6, 0.6], [1, 1, 2]),
     ])
-    def test_mutate_genotype(self, probability, genes, expected, rand, choice):
-        choice = random_sequence(choice)
-        rand = random_sequence(rand)
+    def test_mutate_genotype(self, p, genes, expected, random, randint):
+        rand = random_sequence(random)
+        rint = random_sequence(randint)
 
-        with mock.patch('random.choice', side_effect=lambda arg: next(choice)):
+        with mock.patch('random.randint', side_effect=lambda *_: next(rint)):
             with mock.patch('random.random', side_effect=lambda: next(rand)):
-                execute_mutation_test(probability, swap_genes, genes, expected)
+                execute_mutation_test(p, SwapGenes(), genes, expected)

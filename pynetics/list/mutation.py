@@ -21,8 +21,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""TODO TBD...
+"""Generic mutation schemas for list-based genotypes.
 """
+import abc
 import copy
 import random
 
@@ -31,11 +32,44 @@ from .genotype import ListGenotype
 from ..util import take_chances
 
 
-# TODO Those two have generalizable behaviour
-# ~~~~~~~~~~~~~~~~~~~~~
-# Mutation meta-schemas
-# ~~~~~~~~~~~~~~~~~~~~~
-class RandomGene:
+class PerGeneMutation:
+    """General behaviour for a mutation applied per gene."""
+
+    def __call__(
+            self, p: float, genotype: ListGenotype
+    ) -> ListGenotype:
+        """Performs the mutation schema.
+
+        :param p: The probability of mutation.
+        :param genotype: The genotype to be mutated.
+        :return: A new mutated genotype. If no mutation was performed,
+            the same genotype instance is returned.
+        """
+        clone = None
+        for i, gene in enumerate(genotype):
+            # Check if a mutation occurs over this gene
+            if take_chances(probability=p):
+                # Check if this is the first mutation and clone the
+                # original genotype if it is
+                if clone is None:
+                    clone = copy.deepcopy(genotype)
+                # Apply the specific mutation over the gene
+                self.do(clone, i)
+
+        # Return either the mutated genotype or the original one if no
+        # mutation was performed
+        return clone or genotype
+
+    @abc.abstractmethod
+    def do(self, genotype: ListGenotype, index: int):
+        """Performs the specific mutation
+
+        :param genotype: the genotype to mutate.
+        :param index: which gene is affected.
+        """
+
+
+class RandomGene(PerGeneMutation):
     """Mutates the genotype by changing some genes values.
 
     For each gene the mutation probability will be check and, if a
@@ -47,7 +81,6 @@ class RandomGene:
     mutate in : 2, 7
     -----------
     mutated    : abcdaaba
-
     """
 
     def __init__(self, alphabet: Alphabet, same: bool = False):
@@ -61,41 +94,20 @@ class RandomGene:
         self.alphabet = alphabet
         self.same = same
 
-    def __call__(
-            self,
-            p_mutation: float,
-            genotype: ListGenotype
-    ) -> ListGenotype:
-        """Performs the mutation schema.
+    def do(self, genotype: ListGenotype, index: int):
+        """Performs the specific mutation
 
-        :param p_mutation: The probability of mutation.
-        :param genotype: The genotype to be mutated.
-        :return: A new mutated genotype. If no mutation was performed,
-            the same genotype instance is returned.
+        :param genotype: the genotype to mutate.
+        :param index: which gene is affected.
         """
-        clone = None
-        for i, gene in enumerate(genotype):
-            # Check if a mutation occurs over this gene
-            if take_chances(probability=p_mutation):
-                # Check if this is the first mutation and clone the
-                # original genotype if it is
-                if clone is None:
-                    clone = copy.deepcopy(genotype)
-                # Select a different index to swap with
-                new_gene = self.alphabet.get()
-                while not self.same and gene == new_gene:
-                    new_gene = self.alphabet.get()
-                clone[i] = new_gene
-
-        # Return either the mutated genotype or the original one if no
-        # mutation was performed
-        return clone or genotype
+        # Select a different index to swap with
+        new_gene = self.alphabet.get()
+        while not self.same and genotype[index] == new_gene:
+            new_gene = self.alphabet.get()
+        genotype[index] = new_gene
 
 
-# ~~~~~~~~~~~~~~~~
-# Mutation schemas
-# ~~~~~~~~~~~~~~~~
-def swap_genes(p_mutation: float, genotype: ListGenotype) -> ListGenotype:
+class SwapGenes(PerGeneMutation):
     """Mutates the genotype by swapping two random genes.
 
     For each gene, a random value will be compared against the mutation
@@ -110,30 +122,17 @@ def swap_genes(p_mutation: float, genotype: ListGenotype) -> ListGenotype:
     positions : 3, 5
     -----------
     mutated   : 12365478
-
-    :param p_mutation: The probability of mutation.
-    :param genotype: The genotype to be mutated.
-    :return: A new mutated genotype. If no mutation was performed, the
-        same genotype instance is returned.
     """
-    clone = None
-    indices = tuple(range(len(genotype)))
-    for i in indices:
-        # Check if a mutation occurs over this gene
-        if take_chances(probability=p_mutation):
-            # Check if this is the first mutation and clone the
-            # original genotype if it is
-            if clone is None:
-                clone = copy.deepcopy(genotype)
 
-            # Select a different index to swap with
-            j = random.choice(indices)
-            while j == i:
-                j = random.choice(indices)
+    def do(self, genotype: ListGenotype, index: int):
+        """Performs the specific mutation
 
-            # Swap the genes in the cloned genotype
-            clone[i], clone[j] = clone[j], clone[i]
-
-    # Return either the mutated genotype or the original one if no
-    # mutation was performed
-    return clone or genotype
+        :param genotype: the genotype to mutate.
+        :param index: which gene is affected.
+        """
+        # Select a different index to swap with
+        j = random.randint(0, len(genotype) - 1)
+        while j == index:
+            j = random.randint(0, len(genotype) - 1)
+        # Swap the genes in the cloned genotype
+        genotype[index], genotype[j] = genotype[j], genotype[index]
