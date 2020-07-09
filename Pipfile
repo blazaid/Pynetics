@@ -5,7 +5,7 @@ name = "pypi"
 
 [dev-packages]
 twine = "*"
-sphinx = "*"
+Sphinx = "*"
 pytest = "*"
 flake8 = "*"
 pre-commit = "*"
@@ -16,6 +16,7 @@ renku-sphinx-theme = "*"
 rinohtype = "*"
 
 [packages]
+anytree = "*"
 
 [requires]
 python_version = "3.7"

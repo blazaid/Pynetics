@@ -27,7 +27,7 @@ from unittest.mock import patch
 import pytest
 
 from pynetics.exception import BoundsCannotBeTheSame
-from pynetics.list.genotype import ListGenotype
+from pynetics.list import ListGenotype
 from pynetics.list.real import (
     RealIntervalInitializer,
     FlexibleRecombination, plain_recombination,

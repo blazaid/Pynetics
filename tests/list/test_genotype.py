@@ -25,7 +25,7 @@
 
 import pytest
 
-from pynetics.list.genotype import ListGenotype
+from pynetics.list import ListGenotype
 from tests.test_api import GenotypeTests
 
 

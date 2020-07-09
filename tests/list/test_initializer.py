@@ -27,6 +27,7 @@ import abc
 import pytest
 
 from pynetics.exception import BoundsCannotBeTheSame
+from pynetics.list import ListGenotype
 from pynetics.list.alphabet import (
     BINARY,
     NIBBLE,
@@ -36,7 +37,6 @@ from pynetics.list.alphabet import (
     GENETIC_CODE,
 )
 from pynetics.list.exception import NotEnoughSymbolsInAlphabet
-from pynetics.list.genotype import ListGenotype
 from pynetics.list.initializer import (
     AlphabetInitializer,
     PermutationInitializer,

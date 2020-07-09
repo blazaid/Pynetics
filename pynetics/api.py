@@ -220,8 +220,7 @@ class Genotype(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __eq__(self, other: object) -> bool:
-
-        """Equality operator between two genotypes.
+        """Determines whether two genotypes are the same
 
         Overriding is force to ensure the method differs from that
         provided by default in python.

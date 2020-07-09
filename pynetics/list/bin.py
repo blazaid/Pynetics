@@ -27,7 +27,7 @@ import copy
 import random
 from typing import Tuple
 
-from pynetics.list.genotype import ListGenotype
+from . import ListGenotype
 
 
 # ~~~~~~~~~~~~~~~~~~~~~

@@ -31,9 +31,6 @@ from typing import Any, Iterable, List
 from .. import api
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-# Genotype implementations
-# ~~~~~~~~~~~~~~~~~~~~~~~~
 class ListGenotype(
     api.Genotype,
     collections.abc.MutableSequence,

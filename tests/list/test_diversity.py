@@ -24,12 +24,12 @@
 """Tests for the different diversity implementations."""
 import pytest
 
+from pynetics.list import ListGenotype
 from pynetics.list.alphabet import (
     BINARY,
     GENETIC_CODE,
 )
 from pynetics.list.diversity import average_hamming, DifferentGenesInPopulation
-from pynetics.list.genotype import ListGenotype
 from tests.test_api import DiversityTests
 
 

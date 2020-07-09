@@ -21,13 +21,13 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""TODO TBD...
+"""Operators for specific float representation of list-based genotypes.
 """
 import copy
 import random
 from typing import Tuple
 
-from .genotype import ListGenotype
+from . import ListGenotype
 from .initializer import IntervalInitializer
 # ~~~~~~~~~~~~
 # Initializers

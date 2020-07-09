@@ -26,7 +26,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pynetics.list.genotype import ListGenotype
+from pynetics.list import ListGenotype
 from pynetics.list.recombination import NPivot, pmx, random_mask
 from tests.util import random_sequence
 

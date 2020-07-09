@@ -21,14 +21,3 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 # THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ======================================================================
-"""Implementations of specific operators for list based representations.
-
-This includes genotypes, operations and so. Note that not all the
-implementations work together. For example, there are operators for
-integer representation that are no suitable for real or binary
-representations and vice versa. Even between the same gene kind (e.g.
-integer), there may be problems depending on the problem (e.g. a
-"Knapsack problem" and a "Travelling Salesman Problem" use a completely
-different set of operators with the exception, maybe, the mutation
-schema).
-"""

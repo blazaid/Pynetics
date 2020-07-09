@@ -27,7 +27,7 @@ import copy
 import random
 from typing import Tuple
 
-from .genotype import ListGenotype
+from . import ListGenotype
 from ..util import take_chances
 
 

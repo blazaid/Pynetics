@@ -27,8 +27,8 @@ import abc
 import copy
 import random
 
+from . import ListGenotype
 from .alphabet import Alphabet
-from .genotype import ListGenotype
 from ..util import take_chances
 
 

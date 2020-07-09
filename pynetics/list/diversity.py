@@ -27,8 +27,8 @@ represented by lists.
 import itertools
 from typing import Sequence
 
+from . import ListGenotype
 from .alphabet import Alphabet
-from ..list.genotype import ListGenotype
 
 
 # ~~~~~~~~~~~~~~~~~~~

@@ -27,7 +27,7 @@ import copy
 import random
 from typing import Tuple, Optional
 
-from .genotype import ListGenotype
+from . import ListGenotype
 from .initializer import IntervalInitializer
 from .mutation import PerGeneMutation
 from ..exception import BoundsCannotBeTheSame

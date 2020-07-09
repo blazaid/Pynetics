@@ -26,8 +26,8 @@ from unittest.mock import patch
 
 import pytest
 
+from pynetics.list import ListGenotype
 from pynetics.list.bin import generalised_crossover
-from pynetics.list.genotype import ListGenotype
 from tests.util import random_sequence
 
 

@@ -28,9 +28,9 @@ from __future__ import annotations
 import abc
 from typing import Type
 
+from . import ListGenotype
 from .alphabet import Alphabet
 from .exception import NotEnoughSymbolsInAlphabet
-from .genotype import ListGenotype
 from .. import api
 from ..exception import BoundsCannotBeTheSame
 from ..util import Number

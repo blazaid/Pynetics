@@ -24,7 +24,7 @@
 """Some utility functions common to the list genotype implementation
 tests."""
 
-from pynetics.list.genotype import ListGenotype
+from pynetics.list import ListGenotype
 
 
 def equal_genes_in_genotypes(genotype_1, genotype_2):
