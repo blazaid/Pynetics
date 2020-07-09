@@ -36,12 +36,12 @@
 
         expression = non_terminal
                    | terminal
+                   | "(" , expression , ")"
                    | expression , "?"
                    | expression , "*"
                    | expression , "+"
                    | expression , "~" , integer , [".." , integer]
                    | expression , "[" , decimal , "]"
-                   | "(" , expression , ")"
                    | expression , "|" , expression
                    | expression , "," , expression ;
 
@@ -78,10 +78,11 @@ class Node(metaclass=abc.ABCMeta):
 
 
 class NonTerminal(Node, metaclass=abc.ABCMeta):
-    pass
+    def __init__(self, name):
+        self.name = name
 
 
-class Rule(NonTerminal, metaclass=abc.ABCMeta):
+class Rule(Node, metaclass=abc.ABCMeta):
     def __init__(self, antecedent, consequent):
         self.antecedent = antecedent
         self.consequent = consequent
@@ -132,22 +133,20 @@ class GrammarParser:
         (?P<blank>\s+)
         |(?P<implies>->)
         |(?P<letter>[a-zA-Z])
-        |(?P<underscore>_)
+        |(?P<sub>_)
         |(?P<digit>\d)
         |(?P<symbol>[\[,\],\{,\},\(,\),\<,\>,\',\",\=,\|,\.,\,,\;])
     '''
+    RESERVED_END_RULE = ';'
 
     def __init__(self, text):
         self.text = text
-        self.tokens = None
-        self.grammar = None
-
-        self.__tokenize()
-        self.__parse_grammar()
+        self.tokens = self.__tokenize()
+        self.grammar = self.__parse_grammar()
 
     def __tokenize(self):
         compiler = re.compile(self.PATTERNS, re.VERBOSE | re.DOTALL)
-        self.tokens = []
+        tokens = []
         pos = 0
         while True:
             m = compiler.match(self.text, pos)
@@ -155,32 +154,87 @@ class GrammarParser:
                 pos = m.end()
                 token_name = m.lastgroup
                 token_value = m.group(token_name)
-                self.tokens.append((token_name, token_value))
+                tokens.append((token_name, token_value))
             else:
                 break
         if pos != len(self.text):
             raise SyntaxError(f'Syntax error at position {pos}')
         else:
-            self.tokens = [(c, t) for c, t in self.tokens if c != 'blank']
+            tokens = [(c, t) for c, t in self.tokens if c != 'blank']
+
+        return tokens
+
+    def head(self, cls, expected=None):
+        """Checks if the next token of tokens is of a specified class.
+
+        Given a token type, the method will return whether or not the
+        next element of the tokens stack is of the specified class. If
+        there are no elements, then the method will return false.
+
+        When head is called, the stack will not be modified.
+
+        :param cls: the class to check.
+        :param expected: The value to compare against. If None, no
+            comparison is performed.
+        :returns: True if the next item belongs to the expected class
+            and has the expected value (if any), and False otherwise.
+        """
+        if self.tokens:
+            token_cls, token_value = self.tokens[0]
+            same_class = token_cls == cls
+            same_value = expected is None or expected == token_value
+            return same_class and same_value
+        else:
+            return False
+
+    def pop(self, cls, expected=None):
+        """Pops the next element iff belongs to the specified class.
+
+        Given a class, the method will return the next element of the
+        stack iff that element belongs to the specified class. In that's
+        not the case, the method will fail and an error will be raised.
+
+        When pop is called, the stack will be modified, removing the top
+        element of the stack.
+
+        :param cls: the class to check.
+        :param expected: the value to compare against. If None, no
+            comparison is performed.
+        :returns: the element on the top of the stack.
+        :raises SyntaxError: If the next element of the stack hasn't the
+            specified token type, if it's different to the expected
+            value (if provided), or if there are no more rules.
+        """
+        if len(self.tokens) > 0:
+            token_cls, token_value = self.tokens.pop(0)
+            if token_cls != cls:
+                raise SyntaxError(cls, token_cls, token_value)
+            elif expected is not None and expected != token_value:
+                raise SyntaxError(f'Expected {expected} but got {token_value}')
+            else:
+                return token_value
+        else:
+            raise SyntaxError('Unexpected end of grammar')
 
     def __parse_grammar(self):
         """TODO TBD
 
         grammar = rule , {rule} ;
         """
-        self.grammar = [self.__parse_rule()]
+        grammar = [self.__parse_rule()]
         while self.tokens:
-            self.grammar.append(self.__parse_rule())
+            grammar.append(self.__parse_rule())
+        return grammar
 
     def __parse_rule(self):
         """TODO TBD...
 
         rule = non_terminal , "->" , expression , ";" ;
         """
-        non_terminal = self.parse_non_terminal()
+        non_terminal = self.__parse_non_terminal()
         self.pop('implies')
         expression = self.__parse_expression()
-        self.pop('symbol', ';')
+        self.pop('symbol', GrammarParser.RESERVED_END_RULE)
 
         return Rule(non_terminal, expression)
 
@@ -189,12 +243,37 @@ class GrammarParser:
 
         non_terminal = letter , { alphanum } ;
         """
-        pass
+        return NonTerminal(self.pop('letter') + self.__parse_alphanum())
 
-    '''
+    def __parse_alphanum(self):
+        """TODO TBD...
 
         alphanum = letter | digit | "_" ;
+        """
+        result = ''
+        valid_classes = 'letter', 'digit', 'sub'
+        while any(self.head(cls) for cls in valid_classes):
+            for cls in valid_classes:
+                result += self.pop(cls)
+                break
+        return result
 
+    def __parse_expression(self):
+        """TODO TBD...
+
+        expression = non_terminal
+                   | terminal
+                   | "(" , expression , ")"
+                   | expression , "?"
+                   | expression , "*"
+                   | expression , "+"
+                   | expression , "~" , integer , [".." , integer]
+                   | expression , "[" , decimal , "]"
+                   | expression , "|" , expression
+                   | expression , "," , expression ;
+        """
+        pass
+    '''
         expression = non_terminal
                    | terminal
                    | expression , "?"
@@ -267,59 +346,6 @@ class GrammarParser:
             result = OneToMany(result)
 
         return result
-
-    def head(self, cls, expected=None):
-        """Checks if the next token of tokens is of a specified class.
-
-        Given a token type, the method will return whether or not the
-        next element of the tokens stack is of the specified class. If
-        there are no elements, then the method will return false.
-
-        When head is called, the stack will not be modified.
-
-        :param cls: the class to check.
-        :param expected: The value to compare against. If None, no
-            comparison is performed.
-        :returns: True if the next item belongs to the expected class
-            and has the expected value (if any), and False otherwise.
-        """
-        if self.tokens:
-            token_cls, token_value = self.tokens[0]
-            same_class = token_cls == cls
-            same_value = expected is None or expected == token_value
-            return same_class and same_value
-        else:
-            return False
-
-    def pop(self, cls, expected=None):
-        """Pops the next element iff belongs to the specified class.
-
-        Given a class, the method will return the next element of the
-        stack iff that element belongs to the specified class. In that's
-        not the case, the method will fail and an error will be raised.
-
-        When pop is called, the stack will be modified, removing the top
-        element of the stack.
-
-        :param cls: the class to check.
-        :param expected: the value to compare against. If None, no
-            comparison is performed.
-        :returns: the element on the top of the stack.
-        :raises SyntaxError: If the next element of the stack hasn't the
-            specified token type, if it's different to the expected
-            value (if provided), or if there are no more rules.
-        """
-        if len(self.tokens) > 0:
-            token_cls, token_value = self.tokens.pop(0)
-            if token_cls != cls:
-                raise SyntaxError(cls, token_cls, token_value)
-            elif expected is not None and expected != token_value:
-                raise SyntaxError(f'Expected {expected} but got
-                {token_value}')
-            else:
-                return token_value
-        else:
-            raise SyntaxError('Unexpected end of grammar')
 
 
 equation =
